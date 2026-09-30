@@ -301,10 +301,19 @@ impl MazeData {
         self.maze_flags2 & flags::IS_OUTDOORS != 0
     }
 
-    /// Indoor wall nibble on one side of a cell (bitfield order of the
-    /// original structure: north in bits 0-3, east 4-7, south 8-11, west 12-15).
+    /// Indoor wall nibble on one side of a cell: north in bits 12-15, east
+    /// 8-11, south 4-7, west 0-3. This is the layout the engine actually uses
+    /// (ScummVM `Map::setWall` with `WALL_SHIFTS[dir][2]` = 12/8/4/0, and the
+    /// combat line-of-sight masks), not the unused `MazeWallIndoors` bitfield.
     pub fn indoor_wall(&self, x: usize, y: usize, dir: Direction) -> u8 {
-        ((self.walls[y][x] >> (4 * dir as u16)) & 0xF) as u8
+        ((self.walls[y][x] >> (12 - 4 * dir as u16)) & 0xF) as u8
+    }
+
+    /// Replaces the wall nibble on one side of a cell (`Map::setWall`).
+    pub fn set_indoor_wall(&mut self, x: usize, y: usize, dir: Direction, v: u8) {
+        const KEEP: [u16; 4] = [0x0FFF, 0xF0FF, 0xFF0F, 0xFFF0];
+        let shift = 12 - 4 * dir as u16;
+        self.walls[y][x] = (self.walls[y][x] & KEEP[dir as usize]) | (u16::from(v & 0xF) << shift);
     }
 
     /// Outdoor layers of a cell: `(surface, middle, top, overlay)`.
@@ -402,10 +411,17 @@ mod tests {
     #[test]
     fn wall_helpers() {
         let m = sample();
-        assert_eq!(m.indoor_wall(9, 2, Direction::West), 9);
-        assert_eq!(m.indoor_wall(9, 2, Direction::East), 2);
-        assert_eq!(m.indoor_wall(9, 2, Direction::North), 3);
+        // walls[2][9] = 0x9023
+        assert_eq!(m.indoor_wall(9, 2, Direction::North), 9);
+        assert_eq!(m.indoor_wall(9, 2, Direction::East), 0);
+        assert_eq!(m.indoor_wall(9, 2, Direction::South), 2);
+        assert_eq!(m.indoor_wall(9, 2, Direction::West), 3);
         assert_eq!(m.outdoor_layers(9, 2), (3, 2, 0, 9));
+        let mut m = m;
+        m.set_indoor_wall(9, 2, Direction::East, 0xA);
+        assert_eq!(m.walls[2][9], 0x9A23);
+        m.set_indoor_wall(9, 2, Direction::West, 0);
+        assert_eq!(m.walls[2][9], 0x9A20);
     }
 
     #[test]

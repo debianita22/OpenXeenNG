@@ -63,6 +63,8 @@ pub fn draw_game_char(
     reduced: bool,
     clip: Rect,
 ) -> i32 {
+    // The western releases ignore bit 7 (`getNextChar` masks with 0x7F).
+    let ch = ch & 0x7F;
     let y = if Font::has_descender(ch) { y + 1 } else { y };
     let rows = font.glyph_rows(ch, reduced);
     for (row, bits) in rows.iter().enumerate().take(GLYPH_HEIGHT) {
@@ -81,7 +83,9 @@ pub fn draw_game_char(
     i32::from(font.width(ch, reduced))
 }
 
-/// Draws a plain string with the game font (no control codes yet).
+/// Draws a plain string with the game font (control codes arrive with the
+/// window code in milestone 1). Spaces advance 4 pixels (3 reduced) without
+/// using the width table, as `FontSurface::writeString` does.
 pub fn draw_game_text(
     dest: &mut Surface,
     font: &Font,
@@ -94,15 +98,26 @@ pub fn draw_game_text(
     let clip = dest.rect();
     let mut cx = x;
     for &c in text {
-        cx += draw_game_char(dest, font, c, cx, y, colors, reduced, clip);
+        let c = c & 0x7F;
+        if c == b' ' {
+            cx += if reduced { 3 } else { 4 };
+        } else {
+            cx += draw_game_char(dest, font, c, cx, y, colors, reduced, clip);
+        }
     }
     cx
 }
 
-/// Width of a string in the game font.
+/// Width of a string in the game font, measured like `getNextCharWidth`:
+/// a space counts 4 pixels even in the reduced font, other characters use
+/// the width table, control characters count nothing.
 pub fn game_text_width(font: &Font, text: &[u8], reduced: bool) -> i32 {
     text.iter()
-        .map(|&c| i32::from(font.width(c, reduced)))
+        .map(|&c| match c & 0x7F {
+            b' ' => 4,
+            c if c > b' ' => i32::from(font.width(c, reduced)),
+            _ => 0,
+        })
         .sum()
 }
 
@@ -131,8 +146,21 @@ mod tests {
         let end = draw_game_text(&mut s, &font, 0, 0, b"ag", [0, 10, 11, 12], false);
         assert_eq!(end, 9);
         assert_eq!((s.get(0, 0), s.get(1, 0), s.get(2, 0)), (10, 11, 12));
-        // 'g' is a descender: drawn one row lower.
+        // 'g' is a descender: drawn one row lower, also with bit 7 set.
         assert_eq!(s.get(4, 1), 10);
+        let mut s2 = Surface::new(20, 12);
+        draw_game_text(&mut s2, &font, 0, 0, &[b'g' | 0x80], [0, 10, 11, 12], false);
+        assert_eq!(s2.get(0, 1), 10);
         assert_eq!(game_text_width(&font, b"ag", false), 9);
+        // Spaces: 4 px drawn (3 reduced), always 4 when measured.
+        assert_eq!(
+            draw_game_text(&mut s, &font, 0, 0, b"a a", [0, 1, 2, 3], false),
+            12
+        );
+        assert_eq!(
+            draw_game_text(&mut s, &font, 0, 0, b"a a", [0, 1, 2, 3], true),
+            3
+        );
+        assert_eq!(game_text_width(&font, b"a a", true), 4);
     }
 }

@@ -272,8 +272,9 @@ pub extern "C" fn retro_api_version() -> c_uint {
 
 /// Stores the environment callback and announces no-content support.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn retro_set_environment(cb: EnvironmentFn) {
-    with_callbacks(|c| c.environment = Some(cb));
+pub unsafe extern "C" fn retro_set_environment(cb: Option<EnvironmentFn>) {
+    with_callbacks(|c| c.environment = cb);
+    let Some(cb) = cb else { return };
     let mut yes = true;
     // SAFETY: the frontend gave us a valid callback; the pointer is valid
     // for the duration of the call.
@@ -287,30 +288,30 @@ pub unsafe extern "C" fn retro_set_environment(cb: EnvironmentFn) {
 
 /// Stores the video callback.
 #[unsafe(no_mangle)]
-pub extern "C" fn retro_set_video_refresh(cb: VideoRefreshFn) {
-    with_callbacks(|c| c.video = Some(cb));
+pub extern "C" fn retro_set_video_refresh(cb: Option<VideoRefreshFn>) {
+    with_callbacks(|c| c.video = cb);
 }
 
 /// Single-sample audio is unused (batch only).
 #[unsafe(no_mangle)]
-pub extern "C" fn retro_set_audio_sample(_cb: AudioSampleFn) {}
+pub extern "C" fn retro_set_audio_sample(_cb: Option<AudioSampleFn>) {}
 
 /// Stores the batch audio callback.
 #[unsafe(no_mangle)]
-pub extern "C" fn retro_set_audio_sample_batch(cb: AudioSampleBatchFn) {
-    with_callbacks(|c| c.audio_batch = Some(cb));
+pub extern "C" fn retro_set_audio_sample_batch(cb: Option<AudioSampleBatchFn>) {
+    with_callbacks(|c| c.audio_batch = cb);
 }
 
 /// Stores the input poll callback.
 #[unsafe(no_mangle)]
-pub extern "C" fn retro_set_input_poll(cb: InputPollFn) {
-    with_callbacks(|c| c.input_poll = Some(cb));
+pub extern "C" fn retro_set_input_poll(cb: Option<InputPollFn>) {
+    with_callbacks(|c| c.input_poll = cb);
 }
 
 /// Stores the input state callback.
 #[unsafe(no_mangle)]
-pub extern "C" fn retro_set_input_state(cb: InputStateFn) {
-    with_callbacks(|c| c.input_state = Some(cb));
+pub extern "C" fn retro_set_input_state(cb: Option<InputStateFn>) {
+    with_callbacks(|c| c.input_state = cb);
 }
 
 /// Nothing to do: the engine starts in `retro_load_game`.
@@ -425,8 +426,7 @@ pub unsafe extern "C" fn retro_load_game(game: *const RetroGameInfo) -> bool {
             files = load_dir(dir);
         }
     }
-    start(files);
-    true
+    std::panic::catch_unwind(|| start(files)).is_ok()
 }
 
 fn set_input_descriptors(env: EnvironmentFn) {
@@ -493,6 +493,10 @@ pub extern "C" fn retro_get_region() -> c_uint {
 }
 
 /// Runs one frame.
+///
+/// A panic inside the engine must not unwind into the frontend (that aborts
+/// RetroArch): it is caught, the core stops and asks the frontend to close
+/// the content.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn retro_run() {
     let cbs = callbacks();
@@ -500,6 +504,21 @@ pub unsafe extern "C" fn retro_run() {
     let Some(SendCore(core)) = guard.as_mut() else {
         return;
     };
+    // SAFETY: frontend callbacks are valid for the duration of the call.
+    let ok = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| unsafe {
+        run_frame(core, cbs)
+    }));
+    if ok.is_err() {
+        eprintln!("[OpenXeen] internal error: the core stopped (please report this)");
+        *guard = None;
+        if let Some(env) = cbs.environment {
+            // SAFETY: frontend callback, no data.
+            unsafe { env(RETRO_ENVIRONMENT_SHUTDOWN, std::ptr::null_mut()) };
+        }
+    }
+}
+
+unsafe fn run_frame(core: &mut Core, cbs: Callbacks) {
     if let Some(poll) = cbs.input_poll {
         // SAFETY: frontend callback.
         unsafe { poll() };

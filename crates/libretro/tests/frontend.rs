@@ -63,16 +63,16 @@ fn core_runs_demo_and_content_like_a_frontend() {
     );
     assert!(info.need_fullpath);
 
-    unsafe { retro_set_environment(env) };
+    unsafe { retro_set_environment(Some(env)) };
     assert!(
         ENV_CMDS.lock().unwrap().contains(&18),
         "SET_SUPPORT_NO_GAME"
     );
-    retro_set_video_refresh(video);
-    retro_set_audio_sample(audio_sample);
-    retro_set_audio_sample_batch(audio_batch);
-    retro_set_input_poll(poll);
-    retro_set_input_state(state);
+    retro_set_video_refresh(Some(video));
+    retro_set_audio_sample(Some(audio_sample));
+    retro_set_audio_sample_batch(Some(audio_batch));
+    retro_set_input_poll(Some(poll));
+    retro_set_input_state(Some(state));
     retro_init();
 
     let mut av = std::mem::MaybeUninit::<RetroSystemAvInfo>::uninit();

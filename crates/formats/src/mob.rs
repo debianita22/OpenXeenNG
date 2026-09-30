@@ -19,7 +19,7 @@
 //! file that ends early simply truncates the remaining lists.
 
 use crate::error::Result;
-use crate::io::{Reader, Writer};
+use crate::io::Writer;
 
 /// Id value of an end-of-list record.
 pub const END_ID: u8 = 0xFF;
@@ -56,15 +56,6 @@ impl MobRecord {
         self.x == i8::MIN || self.y == i8::MIN
     }
 
-    fn read(r: &mut Reader<'_>) -> Result<MobRecord> {
-        Ok(MobRecord {
-            x: r.i8()?,
-            y: r.i8()?,
-            id: r.u8()?,
-            direction: r.u8()?,
-        })
-    }
-
     fn write(&self, w: &mut Writer) {
         w.i8(self.x).i8(self.y).u8(self.id).u8(self.direction);
     }
@@ -90,38 +81,33 @@ pub struct MobFile {
 
 impl MobFile {
     /// Parses a `.mob` file with the engine's reading rules.
+    ///
+    /// Like the engine's serializer, reads past the end of the data yield
+    /// zeros, and each list stops as soon as the stream is exhausted at the
+    /// points where the engine checks `finished()`. Parsing never fails.
     pub fn parse(data: &[u8]) -> Result<Self> {
-        let mut r = Reader::new(data, "mob file");
+        let mut r = ZeroFill { data, pos: 0 };
         let mut m = MobFile::default();
         for v in m.object_sprites.iter_mut() {
-            *v = r.u8()?;
+            *v = r.byte();
         }
         for v in m.monster_sprites.iter_mut() {
-            *v = r.u8()?;
+            *v = r.byte();
         }
         for v in m.wall_item_sprites.iter_mut() {
-            *v = r.u8()?;
+            *v = r.byte();
         }
 
-        // Objects: do/while list, first record re-read if it is an end marker.
-        let mut rec = match read_opt(&mut r)? {
-            Some(v) => v,
-            None => return Ok(m),
-        };
+        // Objects: do/while; a leading end marker means "empty list, blank
+        // entry follows" and is skipped.
+        let mut rec = r.record();
         if rec.is_end() {
-            rec = match read_opt(&mut r)? {
-                Some(v) => v,
-                None => return Ok(m),
-            };
+            rec = r.record();
         }
         loop {
             m.objects.push(rec);
-            rec = match read_opt(&mut r)? {
-                Some(v) => v,
-                None => return Ok(m),
-            };
-            if r.at_end() {
-                // ScummVM: `if (s.finished()) return;` right after the read.
+            rec = r.record();
+            if r.finished() {
                 return Ok(m);
             }
             if rec.is_end() {
@@ -129,42 +115,27 @@ impl MobFile {
             }
         }
 
-        // Monsters: while list, same leading end-marker rule.
-        rec = match read_opt(&mut r)? {
-            Some(v) => v,
-            None => return Ok(m),
-        };
+        // Monsters: while list with the same leading end-marker rule.
+        rec = r.record();
         if rec.is_end() {
-            rec = match read_opt(&mut r)? {
-                Some(v) => v,
-                None => return Ok(m),
-            };
+            rec = r.record();
         }
         while !rec.is_end() {
-            if r.at_end() {
+            if r.finished() {
                 return Ok(m);
             }
             m.monsters.push(rec);
-            rec = match read_opt(&mut r)? {
-                Some(v) => v,
-                None => return Ok(m),
-            };
+            rec = r.record();
         }
 
-        // Wall items: plain while list, no dummy entry.
-        rec = match read_opt(&mut r)? {
-            Some(v) => v,
-            None => return Ok(m),
-        };
+        // Wall items: plain while list.
+        rec = r.record();
         while !rec.is_end() {
-            if r.at_end() {
+            if r.finished() {
                 return Ok(m);
             }
             m.wall_items.push(rec);
-            rec = match read_opt(&mut r)? {
-                Some(v) => v,
-                None => return Ok(m),
-            };
+            rec = r.record();
         }
         Ok(m)
     }
@@ -212,13 +183,36 @@ impl MobFile {
     }
 }
 
-/// Reads a record, or `None` once fewer than 4 bytes remain (the engine stops
-/// reading at the end of the stream instead of failing).
-fn read_opt(r: &mut Reader<'_>) -> Result<Option<MobRecord>> {
-    if r.remaining() < 4 {
-        return Ok(None);
+/// Byte source with the engine serializer's end-of-stream behaviour.
+struct ZeroFill<'a> {
+    data: &'a [u8],
+    pos: usize,
+}
+
+impl ZeroFill<'_> {
+    fn byte(&mut self) -> u8 {
+        match self.data.get(self.pos) {
+            Some(&b) => {
+                self.pos += 1;
+                b
+            }
+            None => 0,
+        }
     }
-    MobRecord::read(r).map(Some)
+
+    fn record(&mut self) -> MobRecord {
+        MobRecord {
+            x: self.byte() as i8,
+            y: self.byte() as i8,
+            id: self.byte(),
+            direction: self.byte(),
+        }
+    }
+
+    /// `XeenSerializer::finished`.
+    fn finished(&self) -> bool {
+        self.pos >= self.data.len()
+    }
 }
 
 #[cfg(test)]
@@ -284,6 +278,13 @@ mod tests {
         bytes.truncate(48 + 8);
         let m = MobFile::parse(&bytes).unwrap();
         assert_eq!(m.objects.len(), 1);
-        assert!(MobFile::parse(&bytes[..10]).is_err());
+        // Ending right after the sprite tables: the engine reads one zero
+        // record into the object list before noticing the end.
+        let m = MobFile::parse(&bytes[..48]).unwrap();
+        assert_eq!(m.objects, vec![rec(0, 0, 0, 0)]);
+        // Shorter than the tables: missing ids read as zero.
+        let m = MobFile::parse(&bytes[..10]).unwrap();
+        assert_eq!(m.object_sprites[0], 8);
+        assert_eq!(m.object_sprites[15], 0);
     }
 }

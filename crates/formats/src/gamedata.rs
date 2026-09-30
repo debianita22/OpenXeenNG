@@ -7,10 +7,17 @@
 //! Lookup order for a resource on a given side:
 //! 1. mod overrides (loose files supplied by the player/mod author);
 //! 2. the side's CC archive (`xeen.cc` for Clouds, `dark.cc` for Darkside);
-//! 3. `intro.cc`;
-//! 4. loose files found next to the archives.
+//! 3. loose files found next to the archives;
+//! 4. `intro.cc`.
 //!
-//! Steps 2-4 follow ScummVM's `File::open` search order.
+//! Steps 2-4 follow ScummVM's `File::open`: the current archive first, then
+//! the search manager, where the game directory was registered before
+//! `intro.cc` at the same priority. The current save archive, which ScummVM
+//! checks before everything, arrives with savegames (milestone 3).
+//!
+//! Like `FileManager::setGameCc`, a single-game install answers every side
+//! request from its own archive (Clouds for Clouds of Xeen, Darkside for
+//! Darkside and Swords).
 
 use std::collections::HashMap;
 
@@ -127,6 +134,16 @@ impl GameData {
         }
     }
 
+    /// Maps a requested side to the archive that serves it: only World of
+    /// Xeen has both; other installs coerce every non-intro request.
+    pub fn effective_side(&self, side: Side) -> Side {
+        match (side, self.variant) {
+            (Side::Intro, _) | (_, GameVariant::WorldOfXeen) => side,
+            (_, GameVariant::Clouds) => Side::Clouds,
+            (_, GameVariant::DarkSide | GameVariant::Swords) => Side::Dark,
+        }
+    }
+
     /// The archive for a side, if present.
     pub fn archive(&self, side: Side) -> Option<&CcArchive> {
         match side {
@@ -160,15 +177,19 @@ impl GameData {
         if let Some(d) = self.overrides.get(&k) {
             return Some(d.clone());
         }
+        let side = self.effective_side(side);
         if let Some(d) = self.archive(side).and_then(|a| a.read(&k)) {
             return Some(d);
+        }
+        if let Some(d) = self.loose.get(&k) {
+            return Some(d.clone());
         }
         if side != Side::Intro {
             if let Some(d) = self.intro.as_ref().and_then(|a| a.read(&k)) {
                 return Some(d);
             }
         }
-        self.loose.get(&k).cloned()
+        None
     }
 
     /// Like [`GameData::read`] but returns an error naming the resource.
@@ -219,7 +240,17 @@ mod tests {
         assert_eq!(g.read(Side::Clouds, "intro.pal").unwrap(), b"intro");
         assert_eq!(g.read(Side::Intro, "fnt").unwrap(), b"introfnt");
         assert_eq!(g.read(Side::Clouds, "readme.txt").unwrap(), b"loose");
-        assert!(g.read(Side::Dark, "only.dat").is_none());
+        // Clouds-only install: Darkside requests are served by xeen.cc.
+        assert_eq!(g.read(Side::Dark, "only.dat").unwrap(), b"x");
+        // Loose files come before intro.cc.
+        let i2 = cc(&[("shared.pal", b"intro")]);
+        let g2 = GameData::from_files([
+            ("xeen.cc", cc(&[("x", b"x")])),
+            ("intro.cc", i2),
+            ("shared.pal", b"loose".to_vec()),
+        ])
+        .unwrap();
+        assert_eq!(g2.read(Side::Clouds, "shared.pal").unwrap(), b"loose");
         g.add_override("fnt", b"mod".to_vec());
         assert_eq!(g.read(Side::Clouds, "fnt").unwrap(), b"mod");
         assert!(g.require(Side::Clouds, "missing").is_err());

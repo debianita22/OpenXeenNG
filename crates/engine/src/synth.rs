@@ -7,7 +7,7 @@
 use openxeen_formats::cc::CcBuilder;
 use openxeen_formats::evt::{MazeEvent, events_to_bytes};
 use openxeen_formats::font::FontBuilder;
-use openxeen_formats::maze::{MazeCell, MazeData, flags};
+use openxeen_formats::maze::{Direction, MazeCell, MazeData, flags};
 use openxeen_formats::misc::string_table_to_bytes;
 use openxeen_formats::monster::{Monster, monster_table_to_bytes};
 use openxeen_formats::sprite::{IndexedImage, SpriteBuilder};
@@ -100,20 +100,18 @@ fn maze() -> MazeData {
     for y in 0..16 {
         for x in 0..16 {
             // Outer walls plus a few inner ones, one nibble per side.
-            let mut v = 0u16;
             if y == 15 || (x % 4 == 1 && y % 3 == 0) {
-                v |= 1;
+                m.set_indoor_wall(x, y, Direction::North, 1);
             }
             if x == 15 || (y % 5 == 2 && x % 2 == 0) {
-                v |= 1 << 4;
+                m.set_indoor_wall(x, y, Direction::East, 1);
             }
             if y == 0 {
-                v |= 1 << 8;
+                m.set_indoor_wall(x, y, Direction::South, 1);
             }
             if x == 0 {
-                v |= 1 << 12;
+                m.set_indoor_wall(x, y, Direction::West, 1);
             }
-            m.walls[y][x] = v;
             m.cells[y][x] = MazeCell {
                 surface_id: ((x + y) % 3) as u8,
                 flags: if (x, y) == (7, 7) { 0x10 } else { 0 },

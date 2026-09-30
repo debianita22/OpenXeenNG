@@ -33,6 +33,12 @@ pub const LINE_BUF: usize = 320 * 3;
 pub const LINE_ORIGIN: usize = 320;
 /// Marker for a transparent entry in the line buffer.
 pub const TRANSPARENT: i32 = -1;
+/// Widest cell the line buffer can hold (`LINE_BUF - LINE_ORIGIN`). The
+/// original code has no check and would overrun its buffer; real cells are at
+/// most 320 pixels wide.
+pub const MAX_CELL_WIDTH: u16 = (LINE_BUF - LINE_ORIGIN) as u16;
+/// Largest frame dimension accepted when decoding to an image.
+pub const MAX_FRAME_DIM: usize = 4096;
 
 const PATTERN_STEPS: [i32; 16] = [0, 1, 1, 1, 2, 2, 3, 3, 0, -1, -1, -1, -2, -2, -3, -3];
 
@@ -158,12 +164,19 @@ impl SpriteFile {
     pub fn cell_header(&self, offset: u16) -> Result<CellHeader> {
         let mut r = Reader::new(&self.data, "sprite cell header");
         r.seek(offset as usize)?;
-        Ok(CellHeader {
+        let header = CellHeader {
             x_offset: r.u16()?,
             width: r.u16()?,
             y_offset: r.u16()?,
             height: r.u16()?,
-        })
+        };
+        if header.width > MAX_CELL_WIDTH {
+            return Err(FormatError::invalid(
+                "sprite cell",
+                format!("width {} exceeds {MAX_CELL_WIDTH}", header.width),
+            ));
+        }
+        Ok(header)
     }
 
     /// Size of a frame: the union of its cells' extents
@@ -204,6 +217,12 @@ impl SpriteFile {
     /// Decodes a frame without scaling or flipping.
     pub fn decode_frame(&self, frame: usize) -> Result<IndexedImage> {
         let (w, h) = self.frame_size(frame)?;
+        if w > MAX_FRAME_DIM || h > MAX_FRAME_DIM {
+            return Err(FormatError::invalid(
+                "sprite frame",
+                format!("{w}x{h} exceeds {MAX_FRAME_DIM}x{MAX_FRAME_DIM}"),
+            ));
+        }
         let mut img = IndexedImage::new(w, h);
         let f = self.frame(frame)?;
         self.decode_cell_into(f.cell1, &mut img)?;
@@ -673,6 +692,21 @@ mod tests {
         decode_line(d.as_slice(), 0, row.len() as u8, 5, true, &mut buf).unwrap();
         let got: Vec<i32> = (0..5).map(|x| buf[LINE_ORIGIN + x]).collect();
         assert_eq!(got, vec![TRANSPARENT, TRANSPARENT, 3, 2, 1]);
+    }
+
+    #[test]
+    fn oversized_cells_are_rejected() {
+        let mut d = Writer::new();
+        d.u16(1).u16(6).u16(0);
+        d.u16(0).u16(MAX_CELL_WIDTH + 1).u16(0).u16(1);
+        d.u8(2).u8(0).u8(0xA0);
+        assert!(SpriteFile::parse(d.into_inner()).is_err());
+        let mut d = Writer::new();
+        d.u16(1).u16(6).u16(0);
+        d.u16(60000).u16(10).u16(0).u16(1); // frame 60010 px wide
+        d.u8(2).u8(0).u8(0xA0);
+        let s = SpriteFile::parse(d.into_inner()).unwrap();
+        assert!(s.decode_frame(0).is_err());
     }
 
     #[test]

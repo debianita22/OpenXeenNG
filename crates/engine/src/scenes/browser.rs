@@ -362,9 +362,11 @@ impl Browser {
                         if id >= 100 { 'x' } else { '0' },
                         id
                     );
+                    // Map names are always read from the Darkside archive
+                    // (`Map::getMazeName` opens them with ccMode 1).
                     let map_name = self
                         .data
-                        .read(side, &name_file)
+                        .read(Side::Dark, &name_file)
                         .map(|d| misc::parse_maze_name(&d))
                         .unwrap_or_default();
                     View::Maze(MazeView {
@@ -1062,6 +1064,27 @@ mod tests {
     fn press(e: &mut Engine, k: Key) {
         e.push_input(InputEvent::KeyDown(k));
         e.run_frame(16_667);
+    }
+
+    #[test]
+    fn damaged_entries_do_not_crash_the_browser() {
+        use openxeen_formats::cc::CcBuilder;
+        // A sprite-looking entry with a 700-pixel cell (wider than the line
+        // buffer) under a name the dictionary does not know.
+        let mut wide = vec![1u8, 0, 6, 0, 0, 0];
+        for v in [0u16, 700, 0, 1] {
+            wide.extend_from_slice(&v.to_le_bytes());
+        }
+        wide.extend_from_slice(&[3, 0, 0, 5]);
+        let mut b = CcBuilder::new();
+        b.add_id(0x1234, wide).unwrap();
+        b.add_id(0x4321, vec![0xFF; 10]).unwrap();
+        let files = vec![("xeen.cc".to_string(), b.build(true).unwrap())];
+        let mut e = Engine::from_files(EngineConfig::default(), files);
+        for k in [Key::Enter, Key::Escape, Key::Down, Key::Enter, Key::Escape] {
+            press(&mut e, k);
+        }
+        assert!(e.status().contains("asset browser"));
     }
 
     #[test]

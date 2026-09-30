@@ -12,7 +12,7 @@
 //!   value in a function-level `static`, an accident of the port).
 
 use openxeen_formats::sprite::{
-    LINE_BUF, LINE_ORIGIN, RowRecord, SpriteFile, TRANSPARENT, decode_line,
+    LINE_BUF, LINE_ORIGIN, MAX_FRAME_DIM, RowRecord, SpriteFile, TRANSPARENT, decode_line,
 };
 
 use crate::rng::RandomSource;
@@ -352,8 +352,15 @@ fn draw_cell(
 
     let mut bounds = clip_rect;
     if flags & flags::RESIZE != 0 {
-        if (dest.width() as i32) < x_offset + width || (dest.height() as i32) < y_offset + height {
-            dest.create((x_offset + width) as usize, (y_offset + height) as usize);
+        let (need_w, need_h) = ((x_offset + width) as usize, (y_offset + height) as usize);
+        if need_w > MAX_FRAME_DIM || need_h > MAX_FRAME_DIM {
+            return Err(openxeen_formats::FormatError::invalid(
+                "sprite resize",
+                format!("{need_w}x{need_h} exceeds {MAX_FRAME_DIM}x{MAX_FRAME_DIM}"),
+            ));
+        }
+        if dest.width() < need_w || dest.height() < need_h {
+            dest.create(need_w, need_h);
         }
         bounds = dest.rect();
     }

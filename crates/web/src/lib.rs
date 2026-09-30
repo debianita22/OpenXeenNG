@@ -198,8 +198,9 @@ pub unsafe extern "C" fn ox_status(len_out: *mut u32) -> *const u8 {
             .map(Engine::status)
             .unwrap_or_default()
             .into_bytes();
-        // SAFETY: caller contract.
-        unsafe { *len_out = s.status.len() as u32 };
+        // SAFETY: caller contract; the page passes a byte buffer from
+        // `ox_alloc`, which need not be 4-aligned.
+        unsafe { len_out.write_unaligned(s.status.len() as u32) };
         s.status.as_ptr()
     })
 }
