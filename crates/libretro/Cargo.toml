@@ -1,7 +1,18 @@
 [package]
 name = "openxeen-libretro"
+description = "OpenXeen as a libretro core (RetroArch, Lakka, ...)"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 license.workspace = true
+authors.workspace = true
+
+[lib]
+name = "openxeen_libretro"
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+openxeen-engine.workspace = true
+
+[lints]
+workspace = true

@@ -120,6 +120,9 @@ version = "0.1.0"
 [[package]]
 name = "openxeen-libretro"
 version = "0.1.0"
+dependencies = [
+ "openxeen-engine",
+]
 
 [[package]]
 name = "openxeen-sdl"

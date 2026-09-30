@@ -373,7 +373,7 @@ fn run(opts: Options) -> Result<(), String> {
 
         // Audio: keep ~70 ms queued.
         if let Some(q) = &queue {
-            let target = (AUDIO_RATE as u32 * 2 * 2 * 70 / 1000) as u32;
+            let target = AUDIO_RATE as u32 * 2 * 2 * 70 / 1000;
             let queued = q.size();
             if queued < target {
                 let frames = ((target - queued) / 4) as usize;

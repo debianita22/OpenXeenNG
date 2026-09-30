@@ -1,0 +1,30 @@
+# Software Information
+display_name = "Might and Magic: World of Xeen (OpenXeen)"
+authors = "OpenXeen contributors"
+supported_extensions = "cc"
+corename = "OpenXeen"
+license = "GPLv3"
+permissions = ""
+display_version = "0.1.0"
+categories = "Game"
+
+# Hardware Information
+manufacturer = "PC"
+systemname = "Might and Magic: World of Xeen Game Engine"
+systemid = "openxeen"
+
+# Libretro Features
+supports_no_game = "true"
+savestate = "false"
+cheats = "false"
+input_descriptors = "true"
+memory_descriptors = "false"
+libretro_saves = "false"
+core_options = "false"
+load_subsystem = "false"
+hw_render = "false"
+needs_fullpath = "true"
+disk_control = "false"
+is_experimental = "true"
+
+description = "Open reimplementation of the Might and Magic IV/V (World of Xeen) engine. Load XEEN.CC or DARK.CC from your own copy of the game (e.g. the GOG release); the other archives in the same folder are found automatically. Without content, a demo runs."
