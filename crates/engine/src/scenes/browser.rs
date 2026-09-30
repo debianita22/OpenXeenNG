@@ -367,7 +367,7 @@ impl Browser {
                 .map_err(|x| x.to_string()),
             _ => Ok(View::Text(TextView {
                 title: title.clone(),
-                lines: self.describe(e.kind, &title, &bytes),
+                lines: fit_lines(self.describe(e.kind, &title, &bytes)),
                 scroll: 0,
             })),
         };
@@ -376,9 +376,11 @@ impl Browser {
             Err(msg) => {
                 self.view = View::Text(TextView {
                     title: title.clone(),
-                    lines: std::iter::once(format!("Cannot open: {msg}"))
-                        .chain(hex_dump(&bytes))
-                        .collect(),
+                    lines: fit_lines(
+                        std::iter::once(format!("Cannot open: {msg}"))
+                            .chain(hex_dump(&bytes))
+                            .collect(),
+                    ),
                     scroll: 0,
                 });
             }
@@ -839,6 +841,49 @@ fn draw_maze(s: &mut Surface, m: &MazeView, ui: &UiColors) {
     draw_help(s, "arrows cell Esc back", ui);
 }
 
+/// Columns available to the UI font on a 320-pixel line (minus margins).
+const TEXT_COLS: usize = 39;
+
+/// Makes listing lines fit the 39-column screen: runs of spaces inside a
+/// line collapse to one (leading indentation stays) and long lines wrap with
+/// a hanging indent.
+fn fit_lines(lines: Vec<String>) -> Vec<String> {
+    let mut out = Vec::with_capacity(lines.len());
+    for line in lines {
+        let indent = line.len() - line.trim_start().len();
+        let mut compact = " ".repeat(indent.min(4));
+        let mut prev_space = false;
+        for c in line.trim_start().chars() {
+            if c == ' ' {
+                if !prev_space {
+                    compact.push(c);
+                }
+                prev_space = true;
+            } else {
+                compact.push(c);
+                prev_space = false;
+            }
+        }
+        let chars: Vec<char> = compact.chars().collect();
+        if chars.len() <= TEXT_COLS {
+            out.push(compact);
+            continue;
+        }
+        let hang = "      ";
+        let mut first = true;
+        let mut rest: &[char] = &chars;
+        while !rest.is_empty() {
+            let width = if first { TEXT_COLS } else { TEXT_COLS - hang.len() };
+            let take = rest.len().min(width);
+            let piece: String = rest[..take].iter().collect();
+            out.push(if first { piece } else { format!("{hang}{piece}") });
+            rest = &rest[take..];
+            first = false;
+        }
+    }
+    out
+}
+
 fn hex_dump(bytes: &[u8]) -> Vec<String> {
     bytes
         .chunks(8)
@@ -882,6 +927,18 @@ mod tests {
     use super::*;
     use crate::synth::synthetic_game_files;
     use crate::{Engine, EngineConfig, InputEvent};
+
+    #[test]
+    fn listing_lines_fit_the_screen() {
+        let lines = fit_lines(vec![
+            "    0: SignText               01    ; \"Welcome to the synthetic test map\"".to_string(),
+            "short".to_string(),
+        ]);
+        assert!(lines.iter().all(|l| l.chars().count() <= TEXT_COLS));
+        assert!(lines[0].starts_with("    0: SignText 01 ;"));
+        assert_eq!(lines.last().unwrap(), "short");
+        assert!(lines.len() >= 3);
+    }
 
     #[test]
     fn classifies_by_name_and_content() {

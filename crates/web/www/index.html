@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OpenXeen Player</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=IM+Fell+English+SC&family=VT323&display=swap">
+<style>
+/* Layout: the 320x200 screen sits in a bevelled frame like Xeen's own interface;
+   the control rail sits beside it on wide screens and below it on phones. */
+:root {
+  --ground: #e4e7ed;
+  --panel: #f3f4f7;
+  --ink: #1b2130;
+  --muted: #566074;
+  --brass: #7d5f16;
+  --brass-ink: #fdf8ea;
+  --bevel-hi: #c3c8d2;
+  --bevel-lo: #707789;
+  --screen: #000000;
+  --screen-ink: #f2e6c4;
+  --screen-accent: #d7b25a;
+  --danger: #b3261e;
+  --focus: #2f64c8;
+  --font-display: "IM Fell English SC", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-dos: "VT323", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #10141d;
+    --panel: #171d29;
+    --ink: #e6e2d4;
+    --muted: #97a0b3;
+    --brass: #d7b25a;
+    --brass-ink: #1a1405;
+    --bevel-hi: #3b4458;
+    --bevel-lo: #06080d;
+    --danger: #ff8a80;
+    --focus: #8fb4ff;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #10141d;
+  --panel: #171d29;
+  --ink: #e6e2d4;
+  --muted: #97a0b3;
+  --brass: #d7b25a;
+  --brass-ink: #1a1405;
+  --bevel-hi: #3b4458;
+  --bevel-lo: #06080d;
+  --danger: #ff8a80;
+  --focus: #8fb4ff;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font: 1rem/1.5 var(--font-body);
+  padding-inline: 16px;
+  padding-block: 20px 32px;
+}
+.wrap {
+  max-width: 1120px;
+  margin-inline: auto;
+  display: grid;
+  gap: 20px;
+}
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; }
+h1 {
+  margin: 0;
+  font: 400 clamp(2rem, 5vw, 2.8rem)/1.05 var(--font-display);
+  letter-spacing: 0.02em;
+  text-wrap: balance;
+}
+.tagline { margin: 0; color: var(--muted); max-width: 60ch; }
+
+.stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  grid-template-areas: "screen rail" "notes rail";
+  grid-template-rows: auto 1fr;
+  gap: 20px;
+  align-items: start;
+}
+.frame { grid-area: screen; }
+.rail { grid-area: rail; }
+.notes { grid-area: notes; }
+@media (max-width: 860px) {
+  .stage { grid-template-columns: minmax(0, 1fr); grid-template-areas: "screen" "rail" "notes"; grid-template-rows: auto; }
+}
+
+/* The frame: two-tone bevel, as drawn around the original 3D view. */
+.frame {
+  background: var(--panel);
+  padding: 10px;
+  border: 3px solid;
+  border-color: var(--bevel-hi) var(--bevel-lo) var(--bevel-lo) var(--bevel-hi);
+  box-shadow: inset 0 0 0 2px var(--bevel-lo);
+  min-width: 0;
+}
+.screen-box {
+  position: relative;
+  background: var(--screen);
+  aspect-ratio: 4 / 3;            /* 320x200 was shown on a 4:3 monitor */
+  max-width: 100%;
+  border: 2px solid;
+  border-color: var(--bevel-lo) var(--bevel-hi) var(--bevel-hi) var(--bevel-lo);
+}
+#screen {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  outline: none;
+  cursor: pointer;
+}
+#screen:focus-visible { box-shadow: 0 0 0 3px var(--focus); }
+.status {
+  margin: 8px 2px 0;
+  font: 1.25rem/1.1 var(--font-dos);
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 2px 16px;
+  font-variant-numeric: tabular-nums;
+}
+.status b { color: var(--brass); font-weight: 400; }
+.status span { white-space: nowrap; }
+@media (max-width: 520px) { .status { font-size: 1.05rem; } }
+.drop-hint {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--screen) 70%, transparent);
+  color: var(--screen-ink);
+  font: 1.6rem var(--font-dos);
+  border: 3px dashed var(--screen-accent);
+}
+
+.rail { display: grid; gap: 16px; min-width: 0; }
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--bevel-hi);
+  padding: 14px 16px;
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+.panel h2 {
+  margin: 0;
+  font: 700 0.78rem/1.2 var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+.panel p { margin: 0; }
+.buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+button, .file-label {
+  font: 700 0.95rem/1 var(--font-body);
+  padding: 10px 14px;
+  border: 2px solid;
+  border-color: var(--bevel-hi) var(--bevel-lo) var(--bevel-lo) var(--bevel-hi);
+  background: var(--ground);
+  color: var(--ink);
+  cursor: pointer;
+}
+button:active, .file-label:active { border-color: var(--bevel-lo) var(--bevel-hi) var(--bevel-hi) var(--bevel-lo); }
+button:focus-visible, .file-label:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; }
+.primary { background: var(--brass); color: var(--brass-ink); border-color: var(--brass); }
+.file-label { position: relative; display: inline-block; }
+.file-label input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+.files { margin: 0; padding: 0; list-style: none; font: 1.15rem/1.2 var(--font-dos); display: grid; gap: 2px; }
+.files li { display: flex; justify-content: space-between; gap: 12px; font-variant-numeric: tabular-nums; }
+.files li span:last-child { color: var(--muted); }
+.note { color: var(--muted); font-size: 0.9rem; }
+.error { color: var(--danger); }
+
+.keys { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin: 0; align-items: center; }
+.keys dt { display: flex; gap: 4px; flex-wrap: wrap; }
+.keys dd { margin: 0; color: var(--muted); font-size: 0.92rem; }
+kbd {
+  font: 1.1rem/1 var(--font-dos);
+  min-width: 1.9em;
+  text-align: center;
+  padding: 3px 6px 2px;
+  background: var(--ground);
+  border: 1px solid var(--bevel-lo);
+  border-bottom-width: 3px;
+  color: var(--ink);
+}
+.notes { color: var(--muted); font-size: 0.88rem; max-width: 75ch; display: grid; gap: 6px; }
+.notes p { margin: 0; }
+a { color: var(--brass); }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>OpenXeen</h1>
+    <p class="tagline">An open engine for Might and Magic IV &amp; V, World of Xeen. It runs on your own copy of the game, right here in the browser.</p>
+  </header>
+
+  <main class="stage">
+    <section class="frame" aria-label="Game screen">
+      <div class="screen-box" id="screen-box">
+        <canvas id="screen" width="320" height="200" tabindex="0" aria-label="OpenXeen screen: click, then use the keyboard"></canvas>
+        <div class="drop-hint" id="drop-hint" hidden>Drop XEEN.CC, DARK.CC, INTRO.CC</div>
+      </div>
+      <div class="status" aria-live="polite">
+        <span id="status">Starting…</span>
+        <span>320×200 · 256 colours · <b id="clock">0.0 s</b></span>
+      </div>
+    </section>
+
+    <div class="rail">
+      <section class="panel" aria-labelledby="h-data">
+        <h2 id="h-data">Game data</h2>
+        <p>Pick the archives from your installation folder. Nothing is uploaded: the files are read by this page only.</p>
+        <div class="buttons">
+          <label class="file-label primary">Load game files…
+            <input id="files" type="file" multiple accept=".cc,.CC,.cur,.CUR">
+          </label>
+          <button id="sample" type="button">Sample data</button>
+          <button id="demo" type="button">Demo</button>
+        </div>
+        <ul class="files" id="file-list" aria-label="Loaded files"></ul>
+        <p class="note" id="data-note">No game loaded: the demo is running. <em>Sample data</em> opens a small archive made by OpenXeen itself.</p>
+      </section>
+
+      <section class="panel" aria-labelledby="h-sound">
+        <h2 id="h-sound">Sound &amp; screen</h2>
+        <div class="buttons">
+          <button id="sound" type="button">Sound on</button>
+          <button id="fullscreen" type="button">Fullscreen</button>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="h-keys">
+        <h2 id="h-keys">Controls</h2>
+        <dl class="keys">
+          <dt><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd></dt><dd>Move, pick, change frame</dd>
+          <dt><kbd>Enter</kbd></dt><dd>Open / confirm</dd>
+          <dt><kbd>Esc</kbd></dt><dd>Back / quit</dd>
+          <dt><kbd>Tab</kbd></dt><dd>Switch archive (Clouds, Darkside, Intro)</dd>
+          <dt><kbd>F</kbd><kbd>D</kbd><kbd>C</kbd></dt><dd>Sprites: flip, effect, palette</dd>
+        </dl>
+        <p class="note">A gamepad works too: D-pad to move, right button to confirm, bottom button to go back.</p>
+      </section>
+    </div>
+
+    <section class="notes" aria-label="About this build">
+      <p>This build is milestone 0: it opens every graphic, map, script, font and sound of the original archives. Exploration, combat and the rest of the game arrive in the next milestones.</p>
+      <p>Might and Magic is a trademark of its owner; OpenXeen ships no game data. World of Xeen is sold on GOG in the Might and Magic 6-pack. OpenXeen is free software under the GPL 3.0 or later and builds on the reverse engineering of the <a href="https://www.scummvm.org/" rel="noopener">ScummVM</a> team and the original <a href="https://github.com/busyDuckman/OpenXeen" rel="noopener">OpenXeen</a> by Warren Creemers.</p>
+    </section>
+  </main>
+
+</div>
+<script src="main.js"></script>
+</body>
+</html>
