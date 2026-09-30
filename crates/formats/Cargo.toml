@@ -1,0 +1,13 @@
+[package]
+name = "openxeen-formats"
+description = "Readers and writers for the Might and Magic IV/V (World of Xeen) data formats"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+
+[lints]
+workspace = true
