@@ -1,7 +1,25 @@
 [package]
 name = "openxeen-sdl"
+description = "OpenXeen desktop frontend (SDL2): Linux, Windows, macOS"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 license.workspace = true
+authors.workspace = true
+
+[[bin]]
+name = "openxeen"
+path = "src/main.rs"
+
+[features]
+# Build SDL2 from source and link it statically (used for Windows/macOS
+# release builds; needs CMake).
+bundled = ["sdl2/bundled", "sdl2/static-link"]
 
 [dependencies]
+openxeen-engine.workspace = true
+openxeen-formats.workspace = true
+sdl2 = { version = "0.38", default-features = false }
+
+[lints]
+workspace = true
