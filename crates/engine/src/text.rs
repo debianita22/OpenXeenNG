@@ -16,7 +16,11 @@ pub const UI_CHAR_H: i32 = 8;
 pub fn draw_ui_text(dest: &mut Surface, x: i32, y: i32, text: &str, fg: u8, bg: Option<u8>) -> i32 {
     let mut cx = x;
     for ch in text.chars() {
-        let code = if ch.is_ascii() { ch as usize } else { b'?' as usize };
+        let code = if ch.is_ascii() {
+            ch as usize
+        } else {
+            b'?' as usize
+        };
         if let Some(bg) = bg {
             dest.fill_rect(Rect::new(cx, y, cx + UI_CHAR_W, y + UI_CHAR_H), bg);
         }
@@ -34,7 +38,14 @@ pub fn draw_ui_text(dest: &mut Surface, x: i32, y: i32, text: &str, fg: u8, bg: 
 }
 
 /// Draws UI text with a 1-pixel shadow for readability over images.
-pub fn draw_ui_text_shadow(dest: &mut Surface, x: i32, y: i32, text: &str, fg: u8, shadow: u8) -> i32 {
+pub fn draw_ui_text_shadow(
+    dest: &mut Surface,
+    x: i32,
+    y: i32,
+    text: &str,
+    fg: u8,
+    shadow: u8,
+) -> i32 {
     draw_ui_text(dest, x + 1, y + 1, text, shadow, None);
     draw_ui_text(dest, x, y, text, fg, None)
 }
@@ -90,7 +101,9 @@ pub fn draw_game_text(
 
 /// Width of a string in the game font.
 pub fn game_text_width(font: &Font, text: &[u8], reduced: bool) -> i32 {
-    text.iter().map(|&c| i32::from(font.width(c, reduced))).sum()
+    text.iter()
+        .map(|&c| i32::from(font.width(c, reduced)))
+        .sum()
 }
 
 #[cfg(test)]

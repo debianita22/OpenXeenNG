@@ -12,7 +12,15 @@ use crate::present::{UiColors, default_palette};
 use crate::synth::{orb_image, text_image};
 use crate::text::{draw_ui_text, draw_ui_text_shadow};
 
-const DRAWER_NAMES: [&str; 7] = ["normal", "remap", "scramble", "ghost", "threshold", "fuzz", "xor"];
+const DRAWER_NAMES: [&str; 7] = [
+    "normal",
+    "remap",
+    "scramble",
+    "ghost",
+    "threshold",
+    "fuzz",
+    "xor",
+];
 
 /// Runs the demo until Escape.
 pub async fn run(cx: Cx, message: Option<String>) {
@@ -90,7 +98,11 @@ pub async fn run(cx: Cx, message: Option<String>) {
             let mut x = 4;
             for scale in (0..16).step_by(2) {
                 let bob = (((t as f32 + scale as f32 * 3.0) * 0.3).sin() * 6.0) as i32;
-                let mut f = if drawer == 0 { 0 } else { (drawer << 8) | param };
+                let mut f = if drawer == 0 {
+                    0
+                } else {
+                    (drawer << 8) | param
+                };
                 if flipped {
                     f |= gfx::flags::HORIZ_FLIPPED;
                 }
@@ -106,11 +118,25 @@ pub async fn run(cx: Cx, message: Option<String>) {
             };
             for l in lines {
                 for chunk in wrap(&l, 38) {
-                    draw_ui_text_shadow(s, 8, y, &chunk, if message.is_some() { ui.warn } else { ui.text }, ui.bg);
+                    draw_ui_text_shadow(
+                        s,
+                        8,
+                        y,
+                        &chunk,
+                        if message.is_some() { ui.warn } else { ui.text },
+                        ui.bg,
+                    );
                     y += 10;
                 }
             }
-            draw_ui_text_shadow(s, 8, y, "Add XEEN.CC / DARK.CC to browse assets.", ui.dim, ui.bg);
+            draw_ui_text_shadow(
+                s,
+                8,
+                y,
+                "Add XEEN.CC / DARK.CC to browse assets.",
+                ui.dim,
+                ui.bg,
+            );
             let drawer_line = format!(
                 "Effect: {:<9} param {:>2} {}",
                 DRAWER_NAMES[drawer as usize],

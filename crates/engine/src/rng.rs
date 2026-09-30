@@ -27,9 +27,7 @@ pub struct ScummRandom {
 impl ScummRandom {
     /// Creates a source; a zero seed is bumped to 1 like the original.
     pub fn new(seed: u32) -> Self {
-        ScummRandom {
-            seed: seed.max(1),
-        }
+        ScummRandom { seed: seed.max(1) }
     }
 
     /// Current internal seed.

@@ -65,7 +65,13 @@ pub fn synthetic_font() -> Vec<u8> {
         for (y, bits) in glyph.iter().enumerate() {
             for x in 0..8 {
                 if bits >> x & 1 != 0 {
-                    rows[y][x] = if y < 2 { 3 } else if y < 5 { 2 } else { 1 };
+                    rows[y][x] = if y < 2 {
+                        3
+                    } else if y < 5 {
+                        2
+                    } else {
+                        1
+                    };
                     width = width.max(x + 2);
                 }
             }
@@ -138,7 +144,10 @@ pub fn synthetic_xeen_cc() -> Vec<u8> {
         "001.mon",
         sprite((0..6).map(|i| orb_image(10 + i * 2, i * 2)).collect()),
     );
-    add("global.icn", sprite(vec![text_image("OPENXEEN", 3), text_image("SYNTH", 9)]));
+    add(
+        "global.icn",
+        sprite(vec![text_image("OPENXEEN", 3), text_image("SYNTH", 9)]),
+    );
     let mut back = vec![0u8; 320 * 200];
     for y in 0..200 {
         for x in 0..320 {
@@ -148,12 +157,43 @@ pub fn synthetic_xeen_cc() -> Vec<u8> {
     add("back.raw", back);
     add("maze0001.dat", maze().to_bytes());
     let events = vec![
-        MazeEvent { x: 7, y: 7, direction: 4, line: 0, opcode: 0x04, params: vec![1] },
-        MazeEvent { x: 7, y: 7, direction: 4, line: 1, opcode: 0x12, params: vec![] },
-        MazeEvent { x: 2, y: 3, direction: 0, line: 0, opcode: 0x01, params: vec![0] },
-        MazeEvent { x: 2, y: 3, direction: 0, line: 1, opcode: 0x12, params: vec![] },
+        MazeEvent {
+            x: 7,
+            y: 7,
+            direction: 4,
+            line: 0,
+            opcode: 0x04,
+            params: vec![1],
+        },
+        MazeEvent {
+            x: 7,
+            y: 7,
+            direction: 4,
+            line: 1,
+            opcode: 0x12,
+            params: vec![],
+        },
+        MazeEvent {
+            x: 2,
+            y: 3,
+            direction: 0,
+            line: 0,
+            opcode: 0x01,
+            params: vec![0],
+        },
+        MazeEvent {
+            x: 2,
+            y: 3,
+            direction: 0,
+            line: 1,
+            opcode: 0x12,
+            params: vec![],
+        },
     ];
-    add("maze0001.evt", events_to_bytes(&events).expect("small script"));
+    add(
+        "maze0001.evt",
+        events_to_bytes(&events).expect("small script"),
+    );
     add(
         "aaze0001.txt",
         string_table_to_bytes(&[

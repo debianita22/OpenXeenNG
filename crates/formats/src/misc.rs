@@ -151,9 +151,15 @@ mod tests {
     #[test]
     fn strings() {
         let t = parse_string_table(b"Where to?\0Isle of ScummVM\0");
-        assert_eq!(t, vec!["Where to?".to_string(), "Isle of ScummVM".to_string()]);
+        assert_eq!(
+            t,
+            vec!["Where to?".to_string(), "Isle of ScummVM".to_string()]
+        );
         assert_eq!(parse_string_table(b"a\0\0b"), vec!["a", "", "b"]);
-        assert_eq!(string_table_to_bytes(&t), b"Where to?\0Isle of ScummVM\0".to_vec());
+        assert_eq!(
+            string_table_to_bytes(&t),
+            b"Where to?\0Isle of ScummVM\0".to_vec()
+        );
         let mut name = b"ScummVM".to_vec();
         name.resize(33, 0);
         assert_eq!(parse_maze_name(&name), "ScummVM");

@@ -171,7 +171,10 @@ impl CcBuilder {
         if data.len() > u16::MAX as usize {
             return Err(FormatError::invalid(
                 "CC entry",
-                format!("resource {id:04X} is {} bytes; the limit is 65535", data.len()),
+                format!(
+                    "resource {id:04X} is {} bytes; the limit is 65535",
+                    data.len()
+                ),
             ));
         }
         if let Some(slot) = self.files.iter_mut().find(|(i, _)| *i == id) {

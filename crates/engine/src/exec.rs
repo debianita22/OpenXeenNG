@@ -257,9 +257,15 @@ mod tests {
             *g2.borrow_mut() = Some(cx.wait_key().await);
         });
         assert!(!t.poll_once());
-        shared.borrow_mut().events.push_back(InputEvent::KeyUp(Key::Up));
+        shared
+            .borrow_mut()
+            .events
+            .push_back(InputEvent::KeyUp(Key::Up));
         assert!(!t.poll_once());
-        shared.borrow_mut().events.push_back(InputEvent::KeyDown(Key::Enter));
+        shared
+            .borrow_mut()
+            .events
+            .push_back(InputEvent::KeyDown(Key::Enter));
         assert!(t.poll_once());
         assert_eq!(*got.borrow(), Some(Key::Enter));
     }

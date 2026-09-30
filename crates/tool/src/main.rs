@@ -101,7 +101,11 @@ fn run(args: &[String]) -> Res<()> {
             Ok(())
         }
         "list" => cmd_list(Path::new(p(0, "file.cc")?), encoded),
-        "extract" => cmd_extract(Path::new(p(0, "file.cc")?), Path::new(p(1, "out-dir")?), encoded),
+        "extract" => cmd_extract(
+            Path::new(p(0, "file.cc")?),
+            Path::new(p(1, "out-dir")?),
+            encoded,
+        ),
         "pack" => cmd_pack(Path::new(p(0, "dir")?), Path::new(p(1, "out.cc")?), encoded),
         "hash" => {
             for n in &o.positional {
@@ -116,7 +120,11 @@ fn run(args: &[String]) -> Res<()> {
             o.flags.get("palette").cloned().flatten(),
             o.flags.get("scale").cloned().flatten(),
         ),
-        "palette" => cmd_palette(Path::new(p(0, "file.cc")?), p(1, "name.pal")?, Path::new(p(2, "out.png")?)),
+        "palette" => cmd_palette(
+            Path::new(p(0, "file.cc")?),
+            p(1, "name.pal")?,
+            Path::new(p(2, "out.png")?),
+        ),
         "raw" => cmd_raw(
             Path::new(p(0, "file.cc")?),
             p(1, "name.raw")?,
@@ -185,7 +193,11 @@ fn cmd_extract(path: &Path, out: &Path, encoded: bool) -> Res<()> {
         let data = cc.read_id(e.id).unwrap_or_default();
         fs::write(out.join(&name), data).map_err(|err| format!("{name}: {err}"))?;
     }
-    eprintln!("extracted {} entries to {}", cc.entries().len(), out.display());
+    eprintln!(
+        "extracted {} entries to {}",
+        cc.entries().len(),
+        out.display()
+    );
     Ok(())
 }
 
@@ -236,12 +248,23 @@ fn indexed_to_rgba(pixels: &[u8], pal: &[[u8; 3]; 256], transparent: Option<u8>)
         .flat_map(|&i| {
             let c = pal[usize::from(i)];
             let a = if Some(i) == transparent { 0 } else { 255 };
-            [lut[usize::from(c[0])], lut[usize::from(c[1])], lut[usize::from(c[2])], a]
+            [
+                lut[usize::from(c[0])],
+                lut[usize::from(c[1])],
+                lut[usize::from(c[2])],
+                a,
+            ]
         })
         .collect()
 }
 
-fn cmd_sprite(path: &Path, name: &str, out: &Path, pal: Option<String>, scale: Option<String>) -> Res<()> {
+fn cmd_sprite(
+    path: &Path,
+    name: &str,
+    out: &Path,
+    pal: Option<String>,
+    scale: Option<String>,
+) -> Res<()> {
     let cc = open_cc(path, true)?;
     let data = cc.read(name).ok_or_else(|| format!("{name} not found"))?;
     let sprite = SpriteFile::parse(data).map_err(|e| format!("{name}: {e}"))?;
@@ -253,7 +276,11 @@ fn cmd_sprite(path: &Path, name: &str, out: &Path, pal: Option<String>, scale: O
         Some(s) => return Err(format!("bad --scale {s} (use 1, 2 or 3)")),
     };
     let frames: Vec<_> = (0..sprite.frame_count())
-        .map(|f| sprite.decode_frame(f).map_err(|e| format!("frame {f}: {e}")))
+        .map(|f| {
+            sprite
+                .decode_frame(f)
+                .map_err(|e| format!("frame {f}: {e}"))
+        })
         .collect::<Res<_>>()?;
     // Lay all frames out on one sheet, left to right, wrapping at 1024 px.
     let (mut x, mut y, mut row_h, mut sheet_w) = (0usize, 0usize, 0usize, 0usize);
@@ -300,7 +327,10 @@ fn cmd_palette(path: &Path, name: &str, out: &Path) -> Res<()> {
     let mut s = Surface::new(16 * 16, 16 * 16);
     for i in 0..256usize {
         let (x, y) = ((i % 16) as i32 * 16, (i / 16) as i32 * 16);
-        s.fill_rect(openxeen_engine::gfx::Rect::new(x, y, x + 16, y + 16), i as u8);
+        s.fill_rect(
+            openxeen_engine::gfx::Rect::new(x, y, x + 16, y + 16),
+            i as u8,
+        );
     }
     write_png(out, 256, 256, &indexed_to_rgba(s.pixels(), &pal, None))
 }
@@ -319,7 +349,10 @@ fn cmd_evt(path: &Path, name: &str) -> Res<()> {
     let cc = open_cc(path, true)?;
     let data = cc.read(name).ok_or_else(|| format!("{name} not found"))?;
     let (events, err) = evt::parse_events_lenient(&data);
-    let text_name = name.to_ascii_lowercase().replacen("maze", "aaze", 1).replace(".evt", ".txt");
+    let text_name = name
+        .to_ascii_lowercase()
+        .replacen("maze", "aaze", 1)
+        .replace(".evt", ".txt");
     let texts = cc.read(&text_name).map(|d| misc::parse_string_table(&d));
     print!("{}", evt::disassemble(&events, texts.as_deref()));
     if let Some(e) = err {
@@ -360,21 +393,36 @@ fn load_dir(dir: &Path) -> Res<Vec<(String, Vec<u8>)>> {
     for e in fs::read_dir(dir).map_err(|e| format!("{}: {e}", dir.display()))? {
         let p = e.map_err(|e| e.to_string())?.path();
         if p.is_file() {
-            let name = p.file_name().and_then(|n| n.to_str()).unwrap_or_default().to_string();
+            let name = p
+                .file_name()
+                .and_then(|n| n.to_str())
+                .unwrap_or_default()
+                .to_string();
             out.push((name, fs::read(&p).map_err(|e| e.to_string())?));
         }
     }
     Ok(out)
 }
 
-fn cmd_screenshot(out: &Path, data: Option<String>, frames: Option<String>, keys: Option<String>) -> Res<()> {
+fn cmd_screenshot(
+    out: &Path,
+    data: Option<String>,
+    frames: Option<String>,
+    keys: Option<String>,
+) -> Res<()> {
     let files = match data {
         Some(d) => load_dir(Path::new(&d))?,
         None => Vec::new(),
     };
-    let frames: u32 = frames.map_or(Ok(30), |f| f.parse().map_err(|_| format!("bad --frames {f}")))?;
+    let frames: u32 = frames.map_or(Ok(30), |f| {
+        f.parse().map_err(|_| format!("bad --frames {f}"))
+    })?;
     let keys: Vec<Key> = match keys {
-        Some(k) => k.split(',').filter(|s| !s.is_empty()).map(parse_key).collect::<Res<_>>()?,
+        Some(k) => k
+            .split(',')
+            .filter(|s| !s.is_empty())
+            .map(parse_key)
+            .collect::<Res<_>>()?,
         None => Vec::new(),
     };
     let mut engine = Engine::from_files(EngineConfig::default(), files);

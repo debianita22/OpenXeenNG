@@ -119,7 +119,10 @@ pub fn parse_events(data: &[u8]) -> Result<Vec<MazeEvent>> {
         if len < 5 {
             return Err(FormatError::invalid(
                 "event record",
-                format!("length {len} at offset {} is shorter than the header", r.pos() - 1),
+                format!(
+                    "length {len} at offset {} is shorter than the header",
+                    r.pos() - 1
+                ),
             ));
         }
         let x = r.u8()?;
@@ -177,7 +180,10 @@ pub fn events_to_bytes(events: &[MazeEvent]) -> Result<Vec<u8>> {
     for e in events {
         let len = 5 + e.params.len();
         if len > 255 {
-            return Err(FormatError::invalid("event record", "more than 250 parameters"));
+            return Err(FormatError::invalid(
+                "event record",
+                "more than 250 parameters",
+            ));
         }
         w.u8(len as u8)
             .u8(e.x)
@@ -215,10 +221,7 @@ pub fn disassemble(events: &[MazeEvent], texts: Option<&[String]>) -> String {
         let name = opcode_name(e.opcode).unwrap_or("<unknown>");
         let params: Vec<String> = e.params.iter().map(|p| format!("{p:02X}")).collect();
         let _ = write!(out, "  {:3}: {:<22} {}", e.line, name, params.join(" "));
-        let is_text_op = matches!(
-            e.opcode,
-            0x01..=0x05 | 0x27 | 0x29 | 0x31 | 0x32 | 0x35
-        );
+        let is_text_op = matches!(e.opcode, 0x01..=0x05 | 0x27 | 0x29 | 0x31 | 0x32 | 0x35);
         if let (true, Some(texts), Some(&idx)) = (is_text_op, texts, e.params.first()) {
             if let Some(t) = texts.get(usize::from(idx)) {
                 let _ = write!(out, "    ; \"{}\"", t.replace('\n', "\\n"));

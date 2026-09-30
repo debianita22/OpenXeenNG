@@ -47,7 +47,10 @@ fn scummvm_reference_samples_parse_and_round_trip() {
 
     let texts = misc::parse_string_table(&read(&dir, "aazex255.txt"));
     assert_eq!(texts[1], "Isle of ScummVM");
-    assert_eq!(misc::parse_maze_name(&read(&dir, "xeenx255.txt")), "ScummVM");
+    assert_eq!(
+        misc::parse_maze_name(&read(&dir, "xeenx255.txt")),
+        "ScummVM"
+    );
 
     let mob = mob::MobFile::parse(&read(&dir, "mazex255.mob")).unwrap();
     assert_eq!(mob.objects.len(), 3);

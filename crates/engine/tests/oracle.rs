@@ -17,7 +17,9 @@ use openxeen_formats::names::{candidate_names, name_to_id};
 use openxeen_formats::sprite::SpriteFile;
 
 fn oracle() -> Option<String> {
-    std::env::var("OPENXEEN_ORACLE").ok().filter(|p| std::path::Path::new(p).exists())
+    std::env::var("OPENXEEN_ORACLE")
+        .ok()
+        .filter(|p| std::path::Path::new(p).exists())
 }
 
 fn run_oracle(bin: &str, args: &[&str], stdin: &[u8]) -> Vec<u8> {
@@ -34,8 +36,15 @@ fn run_oracle(bin: &str, args: &[&str], stdin: &[u8]) -> Vec<u8> {
     let input = stdin.to_vec();
     let writer = std::thread::spawn(move || pipe.write_all(&input));
     let out = child.wait_with_output().expect("oracle output");
-    writer.join().expect("writer thread").expect("write oracle stdin");
-    assert!(out.status.success(), "oracle failed: {:?} {args:?}", out.status);
+    writer
+        .join()
+        .expect("writer thread")
+        .expect("write oracle stdin");
+    assert!(
+        out.status.success(),
+        "oracle failed: {:?} {args:?}",
+        out.status
+    );
     out.stdout
 }
 
@@ -120,7 +129,8 @@ fn cc_index_matches_scummvm() {
         let bytes = b.build(round % 2 == 0).unwrap();
         let path = tmp(&format!("index{round}.cc"));
         std::fs::write(&path, &bytes).unwrap();
-        let out = String::from_utf8(run_oracle(&bin, &["index", path.to_str().unwrap()], b"")).unwrap();
+        let out =
+            String::from_utf8(run_oracle(&bin, &["index", path.to_str().unwrap()], b"")).unwrap();
         let (entries, _) = parse_index(&bytes).unwrap();
         let ours: Vec<String> = entries
             .iter()
@@ -231,7 +241,11 @@ fn sprite_renderer_matches_scummvm() {
         let sprite_path = tmp(&format!("s{round}.spr"));
         let pal_path = tmp(&format!("s{round}.pal"));
         std::fs::write(&sprite_path, &bytes).unwrap();
-        std::fs::write(&pal_path, pal.iter().flatten().copied().collect::<Vec<u8>>()).unwrap();
+        std::fs::write(
+            &pal_path,
+            pal.iter().flatten().copied().collect::<Vec<u8>>(),
+        )
+        .unwrap();
 
         let mut cases = Vec::new();
         let mut script = String::new();
@@ -257,7 +271,11 @@ fn sprite_renderer_matches_scummvm() {
                 _ => g.below(32),
             };
             let mut flags = (drawer << 8) | idx;
-            for bit in [gfx::flags::SCENE_CLIPPED, gfx::flags::BOTTOM_CLIPPED, gfx::flags::HORIZ_FLIPPED] {
+            for bit in [
+                gfx::flags::SCENE_CLIPPED,
+                gfx::flags::BOTTOM_CLIPPED,
+                gfx::flags::HORIZ_FLIPPED,
+            ] {
                 if g.chance(30) {
                     flags |= bit;
                 }
@@ -279,7 +297,11 @@ fn sprite_renderer_matches_scummvm() {
         }
         let out = run_oracle(
             &bin,
-            &["draw", sprite_path.to_str().unwrap(), pal_path.to_str().unwrap()],
+            &[
+                "draw",
+                sprite_path.to_str().unwrap(),
+                pal_path.to_str().unwrap(),
+            ],
             script.as_bytes(),
         );
         assert_eq!(out.len(), cases.len() * 64000);
@@ -295,8 +317,10 @@ fn sprite_renderer_matches_scummvm() {
                 palette: &pal,
                 clipped_bottom: cb,
             };
-            gfx::draw_sprite(&mut dest, &sprite, frame, pos, bounds, flags, scale, &mut ctx)
-                .expect("valid sprite draws");
+            gfx::draw_sprite(
+                &mut dest, &sprite, frame, pos, bounds, flags, scale, &mut ctx,
+            )
+            .expect("valid sprite draws");
             let expect = &out[i * 64000..(i + 1) * 64000];
             if dest.pixels() != expect {
                 let first = dest
@@ -314,10 +338,18 @@ fn sprite_renderer_matches_scummvm() {
                     expect[first]
                 );
             }
-            drawn_pixels += dest.pixels().iter().zip(before.pixels()).filter(|(a, b)| a != b).count();
+            drawn_pixels += dest
+                .pixels()
+                .iter()
+                .zip(before.pixels())
+                .filter(|(a, b)| a != b)
+                .count();
             total_cases += 1;
         }
     }
-    assert!(drawn_pixels > 300_000, "cases barely drew anything ({drawn_pixels} px)");
+    assert!(
+        drawn_pixels > 300_000,
+        "cases barely drew anything ({drawn_pixels} px)"
+    );
     eprintln!("{total_cases} draw cases identical to ScummVM ({drawn_pixels} pixels changed)");
 }

@@ -54,7 +54,12 @@ pub unsafe extern "C" fn ox_free(ptr: *mut u8, len: usize) {
 /// Both buffers must come from `ox_alloc` with exactly these lengths; the
 /// name must be UTF-8.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn ox_add_file(name: *mut u8, name_len: usize, data: *mut u8, data_len: usize) {
+pub unsafe extern "C" fn ox_add_file(
+    name: *mut u8,
+    name_len: usize,
+    data: *mut u8,
+    data_len: usize,
+) {
     // SAFETY: caller contract; ox_alloc allocates max(len, 1) bytes.
     let name = unsafe { Vec::from_raw_parts(name, name_len, name_len.max(1)) };
     let data = unsafe { Vec::from_raw_parts(data, data_len, data_len.max(1)) };
@@ -113,7 +118,11 @@ pub extern "C" fn ox_key(code: u32, down: u32) {
     let Some(k) = decode_key(code) else { return };
     STATE.with_borrow_mut(|s| {
         if let Some(e) = s.engine.as_mut() {
-            e.push_input(if down != 0 { InputEvent::KeyDown(k) } else { InputEvent::KeyUp(k) });
+            e.push_input(if down != 0 {
+                InputEvent::KeyDown(k)
+            } else {
+                InputEvent::KeyUp(k)
+            });
         }
     });
 }
@@ -124,8 +133,16 @@ pub extern "C" fn ox_key(code: u32, down: u32) {
 pub extern "C" fn ox_pointer(kind: u32, x: i32, y: i32) {
     let ev = match kind {
         0 => InputEvent::PointerMove { x, y },
-        1 => InputEvent::PointerDown { x, y, secondary: false },
-        2 => InputEvent::PointerDown { x, y, secondary: true },
+        1 => InputEvent::PointerDown {
+            x,
+            y,
+            secondary: false,
+        },
+        2 => InputEvent::PointerDown {
+            x,
+            y,
+            secondary: true,
+        },
         _ => InputEvent::PointerUp,
     };
     STATE.with_borrow_mut(|s| {
@@ -175,7 +192,12 @@ pub extern "C" fn ox_quit_requested() -> u32 {
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn ox_status(len_out: *mut u32) -> *const u8 {
     STATE.with_borrow_mut(|s| {
-        s.status = s.engine.as_ref().map(Engine::status).unwrap_or_default().into_bytes();
+        s.status = s
+            .engine
+            .as_ref()
+            .map(Engine::status)
+            .unwrap_or_default()
+            .into_bytes();
         // SAFETY: caller contract.
         unsafe { *len_out = s.status.len() as u32 };
         s.status.as_ptr()
@@ -216,7 +238,11 @@ mod tests {
         let mut len = 0u32;
         let s = unsafe { ox_status(&mut len) };
         let status = unsafe { std::slice::from_raw_parts(s, len as usize) };
-        assert!(std::str::from_utf8(status).unwrap().contains("asset browser"));
+        assert!(
+            std::str::from_utf8(status)
+                .unwrap()
+                .contains("asset browser")
+        );
         ox_key(6, 1);
         ox_frame(16_667);
         ox_frame(16_667);

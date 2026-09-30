@@ -55,11 +55,19 @@ fn core_runs_demo_and_content_like_a_frontend() {
     let mut info = std::mem::MaybeUninit::<RetroSystemInfo>::uninit();
     unsafe { retro_get_system_info(info.as_mut_ptr()) };
     let info = unsafe { info.assume_init() };
-    assert_eq!(unsafe { CStr::from_ptr(info.library_name) }.to_str().unwrap(), "OpenXeen");
+    assert_eq!(
+        unsafe { CStr::from_ptr(info.library_name) }
+            .to_str()
+            .unwrap(),
+        "OpenXeen"
+    );
     assert!(info.need_fullpath);
 
     unsafe { retro_set_environment(env) };
-    assert!(ENV_CMDS.lock().unwrap().contains(&18), "SET_SUPPORT_NO_GAME");
+    assert!(
+        ENV_CMDS.lock().unwrap().contains(&18),
+        "SET_SUPPORT_NO_GAME"
+    );
     retro_set_video_refresh(video);
     retro_set_audio_sample(audio_sample);
     retro_set_audio_sample_batch(audio_batch);
@@ -70,7 +78,10 @@ fn core_runs_demo_and_content_like_a_frontend() {
     let mut av = std::mem::MaybeUninit::<RetroSystemAvInfo>::uninit();
     unsafe { retro_get_system_av_info(av.as_mut_ptr()) };
     let av = unsafe { av.assume_init() };
-    assert_eq!((av.geometry.base_width, av.geometry.base_height), (320, 200));
+    assert_eq!(
+        (av.geometry.base_width, av.geometry.base_height),
+        (320, 200)
+    );
     assert!((av.geometry.aspect_ratio - 4.0 / 3.0).abs() < 1e-6);
     assert_eq!(av.timing.sample_rate, 48_000.0);
 
@@ -110,7 +121,11 @@ fn core_runs_demo_and_content_like_a_frontend() {
     for _ in 0..3 {
         unsafe { retro_run() };
     }
-    assert_ne!(*LAST_FRAME.lock().unwrap(), list, "RetroPad A should open the entry");
+    assert_ne!(
+        *LAST_FRAME.lock().unwrap(),
+        list,
+        "RetroPad A should open the entry"
+    );
 
     // Keyboard callback path: Escape twice leaves the viewer and quits.
     assert!(!SHUTDOWN.load(Ordering::SeqCst));

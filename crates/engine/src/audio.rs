@@ -111,10 +111,7 @@ impl Mixer {
                 let idx = (voice.pos >> 32) as usize;
                 let frac = ((voice.pos >> 16) & 0xFFFF) as i32;
                 let s0 = i32::from(voice.samples[idx]);
-                let s1 = voice
-                    .samples
-                    .get(idx + 1)
-                    .map_or(s0, |&s| i32::from(s));
+                let s1 = voice.samples.get(idx + 1).map_or(s0, |&s| i32::from(s));
                 let s = s0 + (((s1 - s0) * frac) >> 16);
                 *a += s * gain / 256;
                 voice.pos += voice.step;

@@ -36,9 +36,29 @@ pub const DAMAGE_TYPE_NAMES: [&str; 19] = [
 
 /// Special attack effects (`SpecialAttack`).
 pub const SPECIAL_ATTACK_NAMES: [&str; 23] = [
-    "none", "magic", "fire", "elec", "cold", "poison", "energy", "disease", "insane", "sleep",
-    "curse item", "in love", "drain sp", "curse", "paralyze", "unconscious", "confuse",
-    "break weapon", "weaken", "eradicate", "aging", "death", "stone",
+    "none",
+    "magic",
+    "fire",
+    "elec",
+    "cold",
+    "poison",
+    "energy",
+    "disease",
+    "insane",
+    "sleep",
+    "curse item",
+    "in love",
+    "drain sp",
+    "curse",
+    "paralyze",
+    "unconscious",
+    "confuse",
+    "break weapon",
+    "weaken",
+    "eradicate",
+    "aging",
+    "death",
+    "stone",
 ];
 
 /// Monster families (`MonsterType`).
@@ -201,7 +221,10 @@ pub fn parse_monster_table(data: &[u8]) -> Result<Vec<Monster>> {
     if data.len() % MONSTER_RECORD_BYTES != 0 {
         return Err(FormatError::invalid(
             "monster table",
-            format!("{} bytes is not a multiple of {MONSTER_RECORD_BYTES}", data.len()),
+            format!(
+                "{} bytes is not a multiple of {MONSTER_RECORD_BYTES}",
+                data.len()
+            ),
         ));
     }
     let mut r = Reader::new(data, "monster table");

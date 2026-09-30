@@ -171,7 +171,11 @@ impl FontBuilder {
             }
             self.data[base + y * 2..base + y * 2 + 2].copy_from_slice(&v.to_le_bytes());
         }
-        let wbase = if reduced { l.reduced_widths } else { l.normal_widths };
+        let wbase = if reduced {
+            l.reduced_widths
+        } else {
+            l.normal_widths
+        };
         self.data[wbase + usize::from(ch & 0x7F)] = width;
         self
     }

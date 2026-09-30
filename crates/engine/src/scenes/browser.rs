@@ -205,7 +205,10 @@ impl Browser {
         // Monster attack sounds are named in the monster tables.
         for side in data.sides() {
             for table in ["xeen.mon", "dark.mon"] {
-                if let Some(t) = data.read(side, table).and_then(|d| parse_monster_table(&d).ok()) {
+                if let Some(t) = data
+                    .read(side, table)
+                    .and_then(|d| parse_monster_table(&d).ok())
+                {
                     for m in t {
                         if !m.attack_voc.is_empty() {
                             names.insert(format!("{}.voc", m.attack_voc.to_ascii_lowercase()));
@@ -272,12 +275,26 @@ impl Browser {
         // Palettes available on this side, the main game palette first.
         let mut pals: Vec<(String, Palette)> = Vec::new();
         let candidates = [
-            "mm4.pal", "dark.pal", "intro.pal", "intro1.pal", "mm4e.pal", "white.pal", "fly.pal",
-            "mirror.pal", "endgame.pal", "firemain.pal", "skymain.pal", "scr.pal",
+            "mm4.pal",
+            "dark.pal",
+            "intro.pal",
+            "intro1.pal",
+            "mm4e.pal",
+            "white.pal",
+            "fly.pal",
+            "mirror.pal",
+            "endgame.pal",
+            "firemain.pal",
+            "skymain.pal",
+            "scr.pal",
             "eg250001.pal",
         ];
         for n in candidates {
-            if let Some(p) = self.data.read(side, n).and_then(|d| VgaPalette::parse(&d).ok()) {
+            if let Some(p) = self
+                .data
+                .read(side, n)
+                .and_then(|d| VgaPalette::parse(&d).ok())
+            {
                 pals.push((n.to_string(), p.to_engine_levels()));
             }
         }
@@ -309,18 +326,20 @@ impl Browser {
         self.view_name = title.clone();
         self.error = None;
         let result: Result<View, String> = match e.kind {
-            Kind::Sprite => SpriteFile::parse(bytes.clone()).map_err(|x| x.to_string()).map(|s| {
-                View::Sprite(SpriteView {
-                    sprite: s,
-                    frame: 0,
-                    scale: 0,
-                    flipped: false,
-                    drawer: 0,
-                    param: 0,
-                    animate: false,
-                    last_step: 0,
-                })
-            }),
+            Kind::Sprite => SpriteFile::parse(bytes.clone())
+                .map_err(|x| x.to_string())
+                .map(|s| {
+                    View::Sprite(SpriteView {
+                        sprite: s,
+                        frame: 0,
+                        scale: 0,
+                        flipped: false,
+                        drawer: 0,
+                        param: 0,
+                        animate: false,
+                        last_step: 0,
+                    })
+                }),
             Kind::RawImage => Ok(View::Image(bytes.clone())),
             Kind::Palette => VgaPalette::parse(&bytes)
                 .map(|p| View::Palette(p.to_engine_levels()))
@@ -358,7 +377,8 @@ impl Browser {
             Kind::Sound => parse_voc(&bytes)
                 .map(|v| {
                     let samples: Rc<[i16]> = v.samples.into();
-                    io.mixer.play(Channel::Sfx, samples.clone(), v.sample_rate, false);
+                    io.mixer
+                        .play(Channel::Sfx, samples.clone(), v.sample_rate, false);
                     View::Sound(SoundView {
                         samples,
                         rate: v.sample_rate,
@@ -411,11 +431,17 @@ impl Browser {
                         format!("object sprites  {:?}", m.object_sprite_slots()),
                         format!(
                             "monster ids     {:?}",
-                            m.monster_sprites.iter().filter(|&&v| v != 0xFF).collect::<Vec<_>>()
+                            m.monster_sprites
+                                .iter()
+                                .filter(|&&v| v != 0xFF)
+                                .collect::<Vec<_>>()
                         ),
                         format!(
                             "wall item ids   {:?}",
-                            m.wall_item_sprites.iter().filter(|&&v| v != 0xFF).collect::<Vec<_>>()
+                            m.wall_item_sprites
+                                .iter()
+                                .filter(|&&v| v != 0xFF)
+                                .collect::<Vec<_>>()
                         ),
                     ];
                     for (label, list) in [
@@ -491,9 +517,11 @@ impl Browser {
                 }
                 out
             }
-            Kind::Music => std::iter::once("Adlib music: player arrives with milestone 1".to_string())
-                .chain(hex_dump(bytes))
-                .collect(),
+            Kind::Music => {
+                std::iter::once("Adlib music: player arrives with milestone 1".to_string())
+                    .chain(hex_dump(bytes))
+                    .collect()
+            }
             _ => hex_dump(bytes),
         }
     }
@@ -595,7 +623,9 @@ impl Browser {
                 Key::Escape => self.view = View::List,
                 Key::Char('r') | Key::Space => f.reduced = !f.reduced,
                 Key::Right => f.color_set = (f.color_set + 1) % TEXT_COLORS.len(),
-                Key::Left => f.color_set = (f.color_set + TEXT_COLORS.len() - 1) % TEXT_COLORS.len(),
+                Key::Left => {
+                    f.color_set = (f.color_set + TEXT_COLORS.len() - 1) % TEXT_COLORS.len()
+                }
                 _ => {}
             },
             View::Sound(s) => match k {
@@ -603,7 +633,10 @@ impl Browser {
                     io.mixer.stop(Channel::Sfx);
                     self.view = View::List;
                 }
-                Key::Enter | Key::Space => io.mixer.play(Channel::Sfx, s.samples.clone(), s.rate, false),
+                Key::Enter | Key::Space => {
+                    io.mixer
+                        .play(Channel::Sfx, s.samples.clone(), s.rate, false)
+                }
                 _ => {}
             },
         }
@@ -629,9 +662,10 @@ impl Browser {
             View::List => {
                 let header = format!("{variant} {side_name} {:>5}", self.entries.len());
                 draw_bar(s, 0, &header, &ui);
-                let top = self.selected.saturating_sub(LIST_ROWS / 2).min(
-                    self.entries.len().saturating_sub(LIST_ROWS),
-                );
+                let top = self
+                    .selected
+                    .saturating_sub(LIST_ROWS / 2)
+                    .min(self.entries.len().saturating_sub(LIST_ROWS));
                 for (row, e) in self.entries.iter().enumerate().skip(top).take(LIST_ROWS) {
                     let y = 12 + (row - top) as i32 * 9;
                     let name = e
@@ -655,7 +689,11 @@ impl Browser {
                     v.frame = (v.frame + 1) % v.sprite.frame_count().max(1);
                 }
                 let (fw, fh) = v.sprite.frame_size(v.frame).unwrap_or((0, 0));
-                let mut flags = if v.drawer == 0 { 0 } else { (v.drawer << 8) | v.param };
+                let mut flags = if v.drawer == 0 {
+                    0
+                } else {
+                    (v.drawer << 8) | v.param
+                };
                 if v.flipped {
                     flags |= gfx::flags::HORIZ_FLIPPED;
                 }
@@ -663,7 +701,11 @@ impl Browser {
                 // Checkerboard shows transparency.
                 for y in (area.top..area.bottom).step_by(8) {
                     for x in (0..320).step_by(8) {
-                        let c = if ((x + y) / 8) % 2 == 0 { ui.bg } else { ui.bar };
+                        let c = if ((x + y) / 8) % 2 == 0 {
+                            ui.bg
+                        } else {
+                            ui.bar
+                        };
                         s.fill_rect(Rect::new(x, y, x + 8, (y + 8).min(area.bottom)), c);
                     }
                 }
@@ -676,11 +718,24 @@ impl Browser {
                     palette: &io.palette,
                     clipped_bottom: area.bottom,
                 };
-                let res = gfx::draw_sprite(s, &v.sprite, v.frame, (px, py), area, flags, v.scale, &mut ctx);
+                let res = gfx::draw_sprite(
+                    s,
+                    &v.sprite,
+                    v.frame,
+                    (px, py),
+                    area,
+                    flags,
+                    v.scale,
+                    &mut ctx,
+                );
                 if let Err(e) = res {
                     self.error = Some(e.to_string());
                 }
-                let scale_txt = if enlarge { "x2".to_string() } else { format!("/{}", v.scale) };
+                let scale_txt = if enlarge {
+                    "x2".to_string()
+                } else {
+                    format!("/{}", v.scale)
+                };
                 let header = format!(
                     "{} {}/{} {}x{} {}",
                     self.view_name,
@@ -692,7 +747,14 @@ impl Browser {
                 );
                 draw_bar(s, 0, &header, &ui);
                 let pal_name = &self.palettes[self.palette_idx].0;
-                draw_ui_text(s, 4, 182, &format!("pal {pal_name} fx {} p{}", v.drawer, v.param), ui.dim, None);
+                draw_ui_text(
+                    s,
+                    4,
+                    182,
+                    &format!("pal {pal_name} fx {} p{}", v.drawer, v.param),
+                    ui.dim,
+                    None,
+                );
                 draw_help(s, "<> frame ^v scale F flip D fx C pal", &ui);
             }
             View::Image(bytes) => {
@@ -738,7 +800,11 @@ impl Browser {
                     s,
                     4,
                     182,
-                    &format!("colour set {} {}", f.color_set, if f.reduced { "reduced" } else { "" }),
+                    &format!(
+                        "colour set {} {}",
+                        f.color_set,
+                        if f.reduced { "reduced" } else { "" }
+                    ),
                     ui.dim,
                     None,
                 );
@@ -754,12 +820,26 @@ impl Browser {
                     s.fill_rect(Rect::new(x as i32, 95 - h, x as i32 + 1, 95 + h), ui.hi);
                 }
                 let secs = snd.samples.len() as f32 / snd.rate.max(1) as f32;
-                draw_ui_text(s, 4, 182, &format!("{} samples {:.2}s", snd.samples.len(), secs), ui.dim, None);
+                draw_ui_text(
+                    s,
+                    4,
+                    182,
+                    &format!("{} samples {:.2}s", snd.samples.len(), secs),
+                    ui.dim,
+                    None,
+                );
                 draw_help(s, "Enter play Esc back", &ui);
             }
         }
         if let Some(e) = &self.error {
-            draw_ui_text(s, 4, 172, &e.chars().take(39).collect::<String>(), ui.warn, None);
+            draw_ui_text(
+                s,
+                4,
+                172,
+                &e.chars().take(39).collect::<String>(),
+                ui.warn,
+                None,
+            );
         }
     }
 }
@@ -820,20 +900,34 @@ fn draw_maze(s: &mut Surface, m: &MazeView, ui: &UiColors) {
     let (cx, cy) = m.cursor;
     let sx = ox + cx as i32 * cell;
     let sy = oy + (MAP_SIZE - 1 - cy) as i32 * cell;
-    s.frame_rect(Rect::new(sx - 1, sy - 1, sx + cell + 1, sy + cell + 1), ui.hi);
+    s.frame_rect(
+        Rect::new(sx - 1, sy - 1, sx + cell + 1, sy + cell + 1),
+        ui.hi,
+    );
 
     let px = 170;
     let c = maze.cells[cy][cx];
     let lines = [
         format!("map {}", maze.maze_number),
-        if outdoors { "outdoors".to_string() } else { format!("indoor kind {}", maze.wall_kind) },
-        format!("N{} E{} S{} W{}", maze.surrounding[0], maze.surrounding[1], maze.surrounding[2], maze.surrounding[3]),
+        if outdoors {
+            "outdoors".to_string()
+        } else {
+            format!("indoor kind {}", maze.wall_kind)
+        },
+        format!(
+            "N{} E{} S{} W{}",
+            maze.surrounding[0], maze.surrounding[1], maze.surrounding[2], maze.surrounding[3]
+        ),
         format!("flags {:04X}/{:04X}", maze.maze_flags, maze.maze_flags2),
         String::new(),
         format!("cell {},{}", cx, cy),
         format!("walls {:04X}", maze.walls[cy][cx]),
         format!("surface {} fl {:02X}", c.surface_id, c.flags),
-        format!("seen {} step {}", u8::from(maze.seen[cy][cx]), u8::from(maze.stepped_on[cy][cx])),
+        format!(
+            "seen {} step {}",
+            u8::from(maze.seen[cy][cx]),
+            u8::from(maze.stepped_on[cy][cx])
+        ),
     ];
     for (i, l) in lines.iter().enumerate() {
         draw_ui_text(s, px, oy + i as i32 * 10, l, ui.text, None);
@@ -873,10 +967,18 @@ fn fit_lines(lines: Vec<String>) -> Vec<String> {
         let mut first = true;
         let mut rest: &[char] = &chars;
         while !rest.is_empty() {
-            let width = if first { TEXT_COLS } else { TEXT_COLS - hang.len() };
+            let width = if first {
+                TEXT_COLS
+            } else {
+                TEXT_COLS - hang.len()
+            };
             let take = rest.len().min(width);
             let piece: String = rest[..take].iter().collect();
-            out.push(if first { piece } else { format!("{hang}{piece}") });
+            out.push(if first {
+                piece
+            } else {
+                format!("{hang}{piece}")
+            });
             rest = &rest[take..];
             first = false;
         }
@@ -892,7 +994,13 @@ fn hex_dump(bytes: &[u8]) -> Vec<String> {
             let hex: Vec<String> = c.iter().map(|b| format!("{b:02X}")).collect();
             let asc: String = c
                 .iter()
-                .map(|&b| if (0x20..0x7F).contains(&b) { b as char } else { '.' })
+                .map(|&b| {
+                    if (0x20..0x7F).contains(&b) {
+                        b as char
+                    } else {
+                        '.'
+                    }
+                })
                 .collect();
             format!("{:04X} {:<24}{asc}", i * 8, hex.join(" "))
         })
@@ -931,7 +1039,8 @@ mod tests {
     #[test]
     fn listing_lines_fit_the_screen() {
         let lines = fit_lines(vec![
-            "    0: SignText               01    ; \"Welcome to the synthetic test map\"".to_string(),
+            "    0: SignText               01    ; \"Welcome to the synthetic test map\""
+                .to_string(),
             "short".to_string(),
         ]);
         assert!(lines.iter().all(|l| l.chars().count() <= TEXT_COLS));
@@ -964,7 +1073,14 @@ mod tests {
         // Open each entry, poke the viewer, go back.
         for _ in 0..16 {
             press(&mut e, Key::Enter);
-            for k in [Key::Right, Key::Up, Key::Char('d'), Key::Char('c'), Key::Down, Key::Left] {
+            for k in [
+                Key::Right,
+                Key::Up,
+                Key::Char('d'),
+                Key::Char('c'),
+                Key::Down,
+                Key::Left,
+            ] {
                 press(&mut e, k);
             }
             press(&mut e, Key::Escape);

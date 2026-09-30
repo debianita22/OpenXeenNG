@@ -31,9 +31,22 @@ pub const OUTDOORS_WALL_TYPES: [Option<&str>; 16] = [
 
 /// Ground surface sprites, indexed by surface type.
 pub const SURFACE_NAMES: [&str; 16] = [
-    "water.srf", "dirt.srf", "grass.srf", "snow.srf", "swamp.srf", "lava.srf", "desert.srf",
-    "road.srf", "dwater.srf", "tflr.srf", "sky.srf", "croad.srf", "sewer.srf", "cloud.srf",
-    "scortch.srf", "space.srf",
+    "water.srf",
+    "dirt.srf",
+    "grass.srf",
+    "snow.srf",
+    "swamp.srf",
+    "lava.srf",
+    "desert.srf",
+    "road.srf",
+    "dwater.srf",
+    "tflr.srf",
+    "sky.srf",
+    "croad.srf",
+    "sewer.srf",
+    "cloud.srf",
+    "scortch.srf",
+    "space.srf",
 ];
 
 /// Clouds side music, one per environment.
@@ -41,12 +54,48 @@ pub const MUSIC_FILES1: [&str; 5] = ["outdoors.m", "town.m", "cavern.m", "dungeo
 
 /// Darkside music, seven random picks per environment.
 pub const MUSIC_FILES2: [[&str; 7]; 6] = [
-    ["outday1.m", "outday2.m", "outday4.m", "outnght1.m", "outnght2.m", "outnght4.m", "daydesrt.m"],
-    ["townday1.m", "twnwlk.m", "newbrigh.m", "twnnitea.m", "twnniteb.m", "twnwlk.m", "townday1.m"],
-    ["cavern1.m", "cavern2.m", "cavern3a.m", "cavern1.m", "cavern2.m", "cavern3a.m", "cavern1.m"],
-    ["dngon1.m", "dngon2.m", "dngon3.m", "dngon1.m", "dngon2.m", "dngon3.m", "dngon1.m"],
-    ["cstl1rev.m", "cstl2rev.m", "cstl3rev.m", "cstl1rev.m", "cstl2rev.m", "cstl3rev.m", "cstl1rev.m"],
-    ["sf05.m", "sf05.m", "sf05.m", "sf05.m", "sf05.m", "sf05.m", "sf05.m"],
+    [
+        "outday1.m",
+        "outday2.m",
+        "outday4.m",
+        "outnght1.m",
+        "outnght2.m",
+        "outnght4.m",
+        "daydesrt.m",
+    ],
+    [
+        "townday1.m",
+        "twnwlk.m",
+        "newbrigh.m",
+        "twnnitea.m",
+        "twnniteb.m",
+        "twnwlk.m",
+        "townday1.m",
+    ],
+    [
+        "cavern1.m",
+        "cavern2.m",
+        "cavern3a.m",
+        "cavern1.m",
+        "cavern2.m",
+        "cavern3a.m",
+        "cavern1.m",
+    ],
+    [
+        "dngon1.m", "dngon2.m", "dngon3.m", "dngon1.m", "dngon2.m", "dngon3.m", "dngon1.m",
+    ],
+    [
+        "cstl1rev.m",
+        "cstl2rev.m",
+        "cstl3rev.m",
+        "cstl1rev.m",
+        "cstl2rev.m",
+        "cstl3rev.m",
+        "cstl1rev.m",
+    ],
+    [
+        "sf05.m", "sf05.m", "sf05.m", "sf05.m", "sf05.m", "sf05.m", "sf05.m",
+    ],
 ];
 
 /// Text colour sets: index 0 is the background, 1..=3 the glyph shades.

@@ -23,7 +23,10 @@ pub struct Voc {
 pub fn parse_voc(data: &[u8]) -> Result<Voc> {
     let mut r = Reader::new(data, "voc");
     if r.bytes(SIGNATURE.len())? != SIGNATURE {
-        return Err(FormatError::invalid("voc", "missing Creative Voice File signature"));
+        return Err(FormatError::invalid(
+            "voc",
+            "missing Creative Voice File signature",
+        ));
     }
     let header_size = r.u16()? as usize;
     r.seek(header_size.max(SIGNATURE.len() + 2))?;
@@ -49,21 +52,23 @@ pub fn parse_voc(data: &[u8]) -> Result<Voc> {
                 let divisor = u32::from(body[0]);
                 let codec = body[1];
                 if codec != 0 {
-                    return Err(FormatError::invalid("voc", format!("unsupported codec {codec}")));
+                    return Err(FormatError::invalid(
+                        "voc",
+                        format!("unsupported codec {codec}"),
+                    ));
                 }
                 set_rate(&mut out, 1_000_000 / (256 - divisor.min(255)))?;
                 current_bits = 8;
                 push_pcm(&mut out.samples, &body[2..], 8);
             }
             2 => push_pcm(&mut out.samples, body, current_bits),
-            3
-                if body.len() >= 3 => {
-                    let n = usize::from(u16::from_le_bytes([body[0], body[1]])) + 1;
-                    if out.sample_rate == 0 {
-                        set_rate(&mut out, 1_000_000 / (256 - u32::from(body[2]).min(255)))?;
-                    }
-                    out.samples.extend(std::iter::repeat_n(0, n));
+            3 if body.len() >= 3 => {
+                let n = usize::from(u16::from_le_bytes([body[0], body[1]])) + 1;
+                if out.sample_rate == 0 {
+                    set_rate(&mut out, 1_000_000 / (256 - u32::from(body[2]).min(255)))?;
                 }
+                out.samples.extend(std::iter::repeat_n(0, n));
+            }
             9 => {
                 if body.len() < 12 {
                     return Err(FormatError::invalid("voc", "short type 9 block"));
@@ -114,7 +119,9 @@ fn push_pcm(out: &mut Vec<i16>, data: &[u8], bits: u8) {
 
 /// Encodes 8-bit mono PCM as a minimal `.voc` file (tests, synthetic data).
 pub fn build_voc_u8(sample_rate: u32, samples_u8: &[u8]) -> Vec<u8> {
-    let divisor = 256u32.saturating_sub(1_000_000 / sample_rate.max(3922)).min(255) as u8;
+    let divisor = 256u32
+        .saturating_sub(1_000_000 / sample_rate.max(3922))
+        .min(255) as u8;
     let mut v = SIGNATURE.to_vec();
     v.extend_from_slice(&0x1Au16.to_le_bytes());
     v.extend_from_slice(&0x010Au16.to_le_bytes());

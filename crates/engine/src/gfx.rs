@@ -11,7 +11,9 @@
 //! * drawer 5 recomputes its threshold on every call (ScummVM caches the first
 //!   value in a function-level `static`, an accident of the port).
 
-use openxeen_formats::sprite::{LINE_BUF, LINE_ORIGIN, RowRecord, SpriteFile, TRANSPARENT, decode_line};
+use openxeen_formats::sprite::{
+    LINE_BUF, LINE_ORIGIN, RowRecord, SpriteFile, TRANSPARENT, decode_line,
+};
 
 use crate::rng::RandomSource;
 
@@ -487,8 +489,8 @@ fn plot(
         }
         flags::DRAWER2 => {
             const MASK1: [u16; 32] = [
-                3, 0, 3, 0, 3, 0, 3, 0, 2, 0, 2, 0, 2, 0, 2, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0,
-                0, 0, 0, 0, 0,
+                3, 0, 3, 0, 3, 0, 3, 0, 2, 0, 2, 0, 2, 0, 2, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0,
+                0, 0, 0, 0,
             ];
             const MASK2: [u16; 16] = [
                 0x7E, 0x7E, 0x7E, 0x7E, 0x3E, 0x3E, 0x3E, 0x3E, 0x1E, 0x1E, 0x1E, 0x1E, 0x0E, 0x0E,
@@ -587,7 +589,14 @@ fn draw_pixel2(
     }
 }
 
-fn draw_pixel3(dest: &mut Surface, at: i64, pixel: u8, mask: u16, offset: u16, pal: &[[u8; 3]; 256]) {
+fn draw_pixel3(
+    dest: &mut Surface,
+    at: i64,
+    pixel: u8,
+    mask: u16,
+    offset: u16,
+    pal: &[[u8; 3]; 256],
+) {
     let Some(cur) = read_at(dest, at) else {
         return;
     };
@@ -659,11 +668,22 @@ mod tests {
         let mut dest = Surface::new(32, 32);
         let mut rng = ScummRandom::new(1);
         let pal = [[0u8; 3]; 256];
-        draw_sprite_simple(&mut dest, &s, 0, (0, 0), flags::HORIZ_FLIPPED, 0, &mut ctx(&mut rng, &pal))
-            .unwrap();
+        draw_sprite_simple(
+            &mut dest,
+            &s,
+            0,
+            (0, 0),
+            flags::HORIZ_FLIPPED,
+            0,
+            &mut ctx(&mut rng, &pal),
+        )
+        .unwrap();
         for y in 0..12 {
             for x in 0..16 {
-                assert_eq!(dest.get(15 - x as i32, y as i32), img.get(x, y).unwrap_or(0));
+                assert_eq!(
+                    dest.get(15 - x as i32, y as i32),
+                    img.get(x, y).unwrap_or(0)
+                );
             }
         }
     }
@@ -675,7 +695,8 @@ mod tests {
         let count = |scale: u16| {
             let mut dest = Surface::new(80, 80);
             let mut rng = ScummRandom::new(1);
-            draw_sprite_simple(&mut dest, &s, 0, (2, 2), 0, scale, &mut ctx(&mut rng, &pal)).unwrap();
+            draw_sprite_simple(&mut dest, &s, 0, (2, 2), 0, scale, &mut ctx(&mut rng, &pal))
+                .unwrap();
             dest.pixels().iter().filter(|&&p| p != 0).count()
         };
         let full = count(0);
@@ -711,8 +732,16 @@ mod tests {
             }
         }
         let mut dest = Surface::screen();
-        draw_sprite_simple(&mut dest, &s, 0, (0, 0), flags::SCENE_CLIPPED, 0, &mut ctx(&mut rng, &pal))
-            .unwrap();
+        draw_sprite_simple(
+            &mut dest,
+            &s,
+            0,
+            (0, 0),
+            flags::SCENE_CLIPPED,
+            0,
+            &mut ctx(&mut rng, &pal),
+        )
+        .unwrap();
         for y in 0..8 {
             for x in 0..16 {
                 assert_eq!(dest.get(x, y), 0);
@@ -731,8 +760,16 @@ mod tests {
                 for scale in [0, 5, SCALE_ENLARGE] {
                     let mut dest = Surface::new(20, 20);
                     let f = (drawer << 8) | idx | flags::HORIZ_FLIPPED;
-                    draw_sprite_simple(&mut dest, &s, 0, (12, 15), f, scale, &mut ctx(&mut rng, &pal))
-                        .unwrap();
+                    draw_sprite_simple(
+                        &mut dest,
+                        &s,
+                        0,
+                        (12, 15),
+                        f,
+                        scale,
+                        &mut ctx(&mut rng, &pal),
+                    )
+                    .unwrap();
                 }
             }
         }

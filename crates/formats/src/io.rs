@@ -209,7 +209,11 @@ mod tests {
         assert_eq!(r.u16().unwrap(), 0x0201);
         assert!(matches!(
             r.u16(),
-            Err(FormatError::UnexpectedEof { needed: 2, offset: 2, .. })
+            Err(FormatError::UnexpectedEof {
+                needed: 2,
+                offset: 2,
+                ..
+            })
         ));
         assert_eq!(r.u8().unwrap(), 3);
         assert!(r.at_end());

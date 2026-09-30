@@ -114,7 +114,8 @@ struct RetroKeyboardCallback {
 /// `retro_environment_t`.
 pub type EnvironmentFn = unsafe extern "C" fn(cmd: c_uint, data: *mut c_void) -> bool;
 /// `retro_video_refresh_t`.
-pub type VideoRefreshFn = unsafe extern "C" fn(data: *const c_void, width: c_uint, height: c_uint, pitch: usize);
+pub type VideoRefreshFn =
+    unsafe extern "C" fn(data: *const c_void, width: c_uint, height: c_uint, pitch: usize);
 /// `retro_audio_sample_t`.
 pub type AudioSampleFn = unsafe extern "C" fn(left: i16, right: i16);
 /// `retro_audio_sample_batch_t`.
@@ -122,8 +123,10 @@ pub type AudioSampleBatchFn = unsafe extern "C" fn(data: *const i16, frames: usi
 /// `retro_input_poll_t`.
 pub type InputPollFn = unsafe extern "C" fn();
 /// `retro_input_state_t`.
-pub type InputStateFn = unsafe extern "C" fn(port: c_uint, device: c_uint, index: c_uint, id: c_uint) -> i16;
-type KeyboardEventFn = unsafe extern "C" fn(down: bool, keycode: c_uint, character: u32, key_modifiers: u16);
+pub type InputStateFn =
+    unsafe extern "C" fn(port: c_uint, device: c_uint, index: c_uint, id: c_uint) -> i16;
+type KeyboardEventFn =
+    unsafe extern "C" fn(down: bool, keycode: c_uint, character: u32, key_modifiers: u16);
 
 // --- state -------------------------------------------------------------------
 
@@ -213,7 +216,11 @@ pub fn map_retro_key(code: c_uint) -> Option<Key> {
 
 unsafe extern "C" fn keyboard_event(down: bool, keycode: c_uint, _character: u32, _mods: u16) {
     if let Some(k) = map_retro_key(keycode) {
-        let ev = if down { InputEvent::KeyDown(k) } else { InputEvent::KeyUp(k) };
+        let ev = if down {
+            InputEvent::KeyDown(k)
+        } else {
+            InputEvent::KeyUp(k)
+        };
         let mut q = KEY_QUEUE.lock().unwrap_or_else(|e| e.into_inner());
         if q.len() < 64 {
             q.push(ev);
@@ -230,7 +237,8 @@ fn load_dir(dir: &Path) -> Vec<(String, Vec<u8>)> {
             let p = e.path();
             let name = p.file_name()?.to_str()?.to_string();
             let lower = name.to_ascii_lowercase();
-            let wanted = lower.ends_with(".cc") || lower.ends_with(".cur") || lower.ends_with(".dat");
+            let wanted =
+                lower.ends_with(".cc") || lower.ends_with(".cur") || lower.ends_with(".dat");
             if !p.is_file() || !wanted {
                 return None;
             }
@@ -270,7 +278,10 @@ pub unsafe extern "C" fn retro_set_environment(cb: EnvironmentFn) {
     // SAFETY: the frontend gave us a valid callback; the pointer is valid
     // for the duration of the call.
     unsafe {
-        cb(RETRO_ENVIRONMENT_SET_SUPPORT_NO_GAME, (&mut yes as *mut bool).cast());
+        cb(
+            RETRO_ENVIRONMENT_SET_SUPPORT_NO_GAME,
+            (&mut yes as *mut bool).cast(),
+        );
     }
 }
 
@@ -377,7 +388,12 @@ pub unsafe extern "C" fn retro_load_game(game: *const RetroGameInfo) -> bool {
     };
     let mut fmt = RETRO_PIXEL_FORMAT_XRGB8888;
     // SAFETY: valid callback, pointer valid during the call.
-    if !unsafe { env(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, (&mut fmt as *mut c_uint).cast()) } {
+    if !unsafe {
+        env(
+            RETRO_ENVIRONMENT_SET_PIXEL_FORMAT,
+            (&mut fmt as *mut c_uint).cast(),
+        )
+    } {
         return false;
     }
     set_input_descriptors(env);
@@ -386,7 +402,10 @@ pub unsafe extern "C" fn retro_load_game(game: *const RetroGameInfo) -> bool {
     };
     // SAFETY: as above; the frontend copies the struct.
     unsafe {
-        env(RETRO_ENVIRONMENT_SET_KEYBOARD_CALLBACK, (&mut kb as *mut RetroKeyboardCallback).cast());
+        env(
+            RETRO_ENVIRONMENT_SET_KEYBOARD_CALLBACK,
+            (&mut kb as *mut RetroKeyboardCallback).cast(),
+        );
     }
 
     let mut files = Vec::new();
@@ -394,9 +413,15 @@ pub unsafe extern "C" fn retro_load_game(game: *const RetroGameInfo) -> bool {
     // NUL-terminated string (need_fullpath = true).
     if let Some(g) = unsafe { game.as_ref() } {
         if !g.path.is_null() {
-            let path = unsafe { CStr::from_ptr(g.path) }.to_string_lossy().into_owned();
+            let path = unsafe { CStr::from_ptr(g.path) }
+                .to_string_lossy()
+                .into_owned();
             let p = Path::new(&path);
-            let dir = if p.is_dir() { p } else { p.parent().unwrap_or(p) };
+            let dir = if p.is_dir() {
+                p
+            } else {
+                p.parent().unwrap_or(p)
+            };
             files = load_dir(dir);
         }
     }
@@ -438,13 +463,20 @@ fn set_input_descriptors(env: EnvironmentFn) {
     });
     // SAFETY: the list is NUL-terminated and outlives the call.
     unsafe {
-        env(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, list.as_mut_ptr().cast());
+        env(
+            RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS,
+            list.as_mut_ptr().cast(),
+        );
     }
 }
 
 /// Special content types are not supported.
 #[unsafe(no_mangle)]
-pub extern "C" fn retro_load_game_special(_t: c_uint, _info: *const RetroGameInfo, _n: usize) -> bool {
+pub extern "C" fn retro_load_game_special(
+    _t: c_uint,
+    _info: *const RetroGameInfo,
+    _n: usize,
+) -> bool {
     false
 }
 
@@ -480,11 +512,19 @@ pub unsafe extern "C" fn retro_run() {
             if down != *was {
                 *was = down;
                 let k = button.default_key();
-                core.engine.push_input(if down { InputEvent::KeyDown(k) } else { InputEvent::KeyUp(k) });
+                core.engine.push_input(if down {
+                    InputEvent::KeyDown(k)
+                } else {
+                    InputEvent::KeyUp(k)
+                });
             }
         }
     }
-    for ev in KEY_QUEUE.lock().unwrap_or_else(|e| e.into_inner()).drain(..) {
+    for ev in KEY_QUEUE
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .drain(..)
+    {
         core.engine.push_input(ev);
     }
 

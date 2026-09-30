@@ -175,7 +175,8 @@ mod tests {
         }
         let mut rgba = vec![0u8; WIDTH * HEIGHT * 4];
         e.frame_rgba(&mut rgba);
-        let distinct: std::collections::HashSet<_> = rgba.chunks(4).map(|c| [c[0], c[1], c[2]]).collect();
+        let distinct: std::collections::HashSet<_> =
+            rgba.chunks(4).map(|c| [c[0], c[1], c[2]]).collect();
         assert!(distinct.len() > 8, "only {} colours", distinct.len());
         assert!(!e.quit_requested());
         e.push_input(InputEvent::KeyDown(Key::Escape));

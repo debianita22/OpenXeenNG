@@ -476,7 +476,10 @@ fn encode_cell(w: &mut Writer, img: &IndexedImage) -> Result<()> {
     let y0 = (0..img.height).find(|&y| opaque_row(y)).unwrap_or(0);
     let width = img.width - x0;
     let height = img.height - y0;
-    w.u16(x0 as u16).u16(width as u16).u16(y0 as u16).u16(height as u16);
+    w.u16(x0 as u16)
+        .u16(width as u16)
+        .u16(y0 as u16)
+        .u16(height as u16);
 
     let mut y = y0;
     while y < img.height {
@@ -630,9 +633,10 @@ mod tests {
             1, // first x
             0x01, 10, 11, // literal 2
             0x40, 20, // run of 3
-            0x80, 30, 31, // pair x2
+            0x80, 30, 31,   // pair x2
             0xA1, // skip 2
-            0xC4, 50, // pattern: base=(0xC4>>2)&0xE = 0x31&0xE = 0 -> steps 0,1 ; n=3 (opcode&7=4? no)
+            0xC4,
+            50, // pattern: base=(0xC4>>2)&0xE = 0x31&0xE = 0 -> steps 0,1 ; n=3 (opcode&7=4? no)
         ];
         // 0xC4: n = (0xC4 & 7) + 3 = 4 + 3 = 7; base = (0xC4 >> 2) & 0xE = 0x31 & 0xE = 0
         d.u8(row.len() as u8).bytes(&row);

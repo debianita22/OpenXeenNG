@@ -115,7 +115,9 @@ fn load_game_dir(dir: &Path) -> Vec<(String, Vec<u8>)> {
         };
         // Only what the engine can use; avoids reading unrelated big files.
         let lower = name.to_ascii_lowercase();
-        let wanted = lower.ends_with(".cc") || lower.ends_with(".cur") || lower.ends_with(".dat")
+        let wanted = lower.ends_with(".cc")
+            || lower.ends_with(".cur")
+            || lower.ends_with(".dat")
             || lower.ends_with(".pal");
         if p.is_file() && wanted {
             if let Ok(bytes) = std::fs::read(&p) {
@@ -201,7 +203,12 @@ fn picture_rect(win_w: u32, win_h: u32, aspect: bool) -> Rect {
     } else {
         (win_w, (win_w as f32 / target) as u32)
     };
-    Rect::new(((win_w - w) / 2) as i32, ((win_h - h) / 2) as i32, w.max(1), h.max(1))
+    Rect::new(
+        ((win_w - w) / 2) as i32,
+        ((win_h - h) / 2) as i32,
+        w.max(1),
+        h.max(1),
+    )
 }
 
 fn main() {
@@ -226,10 +233,17 @@ fn run(opts: Options) -> Result<(), String> {
         let cwd = std::env::current_dir().ok()?;
         has_game(&cwd).then_some(cwd)
     });
-    let mut engine = Engine::from_files(config, data_dir.as_deref().map(load_game_dir).unwrap_or_default());
+    let mut engine = Engine::from_files(
+        config,
+        data_dir.as_deref().map(load_game_dir).unwrap_or_default(),
+    );
 
     let win_w = WIDTH as u32 * opts.scale;
-    let win_h = if opts.aspect { win_w * 3 / 4 } else { HEIGHT as u32 * opts.scale };
+    let win_h = if opts.aspect {
+        win_w * 3 / 4
+    } else {
+        HEIGHT as u32 * opts.scale
+    };
     let mut wb = video.window("OpenXeen", win_w, win_h);
     wb.position_centered().resizable().allow_highdpi();
     if opts.fullscreen {
@@ -249,7 +263,12 @@ fn run(opts: Options) -> Result<(), String> {
                 .window("OpenXeen", win_w, win_h)
                 .build()
                 .map_err(|e| e.to_string())?;
-            window.into_canvas().software().target_texture().build().map_err(|e| e.to_string())?
+            window
+                .into_canvas()
+                .software()
+                .target_texture()
+                .build()
+                .map_err(|e| e.to_string())?
         }
     };
     let creator = canvas.texture_creator();
@@ -259,7 +278,11 @@ fn run(opts: Options) -> Result<(), String> {
     let up = opts.scale.max(2);
     sdl2::hint::set("SDL_RENDER_SCALE_QUALITY", "1");
     let mut big_tex = creator
-        .create_texture_target(PixelFormatEnum::ARGB8888, WIDTH as u32 * up, HEIGHT as u32 * up)
+        .create_texture_target(
+            PixelFormatEnum::ARGB8888,
+            WIDTH as u32 * up,
+            HEIGHT as u32 * up,
+        )
         .map_err(|e| e.to_string())?;
 
     let audio_sub = sdl.audio().ok();
@@ -291,7 +314,9 @@ fn run(opts: Options) -> Result<(), String> {
         for ev in events.poll_iter() {
             match ev {
                 Event::Quit { .. } => break 'main,
-                Event::KeyDown { keycode: Some(k), .. } => {
+                Event::KeyDown {
+                    keycode: Some(k), ..
+                } => {
                     if k == Keycode::F11 {
                         use sdl2::video::FullscreenType;
                         let w = canvas.window_mut();
@@ -305,7 +330,9 @@ fn run(opts: Options) -> Result<(), String> {
                         engine.push_input(InputEvent::KeyDown(key));
                     }
                 }
-                Event::KeyUp { keycode: Some(k), .. } => {
+                Event::KeyUp {
+                    keycode: Some(k), ..
+                } => {
                     if let Some(key) = map_keycode(k) {
                         engine.push_input(InputEvent::KeyUp(key));
                     }
@@ -345,10 +372,17 @@ fn run(opts: Options) -> Result<(), String> {
                 Event::MouseButtonUp { .. } => engine.push_input(InputEvent::PointerUp),
                 Event::DropFile { filename, .. } => {
                     let p = PathBuf::from(filename);
-                    let dir = if p.is_dir() { p } else { p.parent().map(Path::to_path_buf).unwrap_or(p) };
+                    let dir = if p.is_dir() {
+                        p
+                    } else {
+                        p.parent().map(Path::to_path_buf).unwrap_or(p)
+                    };
                     engine = Engine::from_files(config, load_game_dir(&dir));
                 }
-                Event::Window { win_event: WindowEvent::Close, .. } => break 'main,
+                Event::Window {
+                    win_event: WindowEvent::Close,
+                    ..
+                } => break 'main,
                 _ => {}
             }
         }
@@ -434,7 +468,10 @@ fn run(opts: Options) -> Result<(), String> {
 fn save_screenshot(engine: &Engine, path: &Path) -> Result<(), String> {
     let mut rgba = vec![0u8; WIDTH * HEIGHT * 4];
     engine.frame_rgba(&mut rgba);
-    let mut rgb: Vec<u8> = rgba.chunks_exact(4).flat_map(|s| [s[0], s[1], s[2]]).collect();
+    let mut rgb: Vec<u8> = rgba
+        .chunks_exact(4)
+        .flat_map(|s| [s[0], s[1], s[2]])
+        .collect();
     let surf = sdl2::surface::Surface::from_data(
         &mut rgb,
         WIDTH as u32,
