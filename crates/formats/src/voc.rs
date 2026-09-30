@@ -56,15 +56,14 @@ pub fn parse_voc(data: &[u8]) -> Result<Voc> {
                 push_pcm(&mut out.samples, &body[2..], 8);
             }
             2 => push_pcm(&mut out.samples, body, current_bits),
-            3 => {
-                if body.len() >= 3 {
+            3
+                if body.len() >= 3 => {
                     let n = usize::from(u16::from_le_bytes([body[0], body[1]])) + 1;
                     if out.sample_rate == 0 {
                         set_rate(&mut out, 1_000_000 / (256 - u32::from(body[2]).min(255)))?;
                     }
                     out.samples.extend(std::iter::repeat_n(0, n));
                 }
-            }
             9 => {
                 if body.len() < 12 {
                     return Err(FormatError::invalid("voc", "short type 9 block"));
@@ -136,7 +135,7 @@ mod tests {
 
     #[test]
     fn round_trip_8bit() {
-        let pcm: Vec<u8> = (0..100).map(|i| (128 + (i % 20) as i32 - 10) as u8).collect();
+        let pcm: Vec<u8> = (0..100).map(|i| (128 + (i % 20) - 10) as u8).collect();
         let voc = parse_voc(&build_voc_u8(11025, &pcm)).unwrap();
         // divisor = 256 - 1_000_000/11025 = 256 - 90 = 166 -> rate 1e6/90
         assert_eq!(voc.sample_rate, 11111);

@@ -632,7 +632,7 @@ mod tests {
             0x40, 20, // run of 3
             0x80, 30, 31, // pair x2
             0xA1, // skip 2
-            0xC4 | 0x00, 50, // pattern: base=(0xC4>>2)&0xE = 0x31&0xE = 0 -> steps 0,1 ; n=3 (opcode&7=4? no)
+            0xC4, 50, // pattern: base=(0xC4>>2)&0xE = 0x31&0xE = 0 -> steps 0,1 ; n=3 (opcode&7=4? no)
         ];
         // 0xC4: n = (0xC4 & 7) + 3 = 4 + 3 = 7; base = (0xC4 >> 2) & 0xE = 0x31 & 0xE = 0
         d.u8(row.len() as u8).bytes(&row);

@@ -1,7 +1,20 @@
 [package]
 name = "openxeen-tool"
+description = "xeentool: inspect, extract and build World of Xeen data files"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 license.workspace = true
+authors.workspace = true
+
+[[bin]]
+name = "xeentool"
+path = "src/main.rs"
 
 [dependencies]
+openxeen-formats.workspace = true
+openxeen-engine.workspace = true
+png = "0.17"
+
+[lints]
+workspace = true
