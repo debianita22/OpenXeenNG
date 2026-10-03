@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// OpenXeen browser frontend: loads openxeen.wasm, feeds it the files the
+// OpenXeenNG browser frontend: loads openxeenng.wasm, feeds it the files the
 // player picks (they never leave the browser), runs one engine frame per
 // animation frame and plays the audio it mixes.
 (() => {
@@ -210,7 +210,7 @@
       canvas.focus();
     });
     $("sample").addEventListener("click", () => {
-      showFiles([{ name: "xeen.cc (sample made by OpenXeen)", size: 80000 }]);
+      showFiles([{ name: "xeen.cc (sample made by OpenXeenNG)", size: 80000 }]);
       noteEl.classList.remove("error");
       noteEl.textContent = "Sample archive loaded: every viewer works on it.";
       start("synthetic");
@@ -269,8 +269,8 @@
 
   async function boot() {
     try {
-      const res = await fetch("openxeen.wasm");
-      if (!res.ok) throw new Error("openxeen.wasm: HTTP " + res.status);
+      const res = await fetch("openxeenng.wasm");
+      if (!res.ok) throw new Error("openxeenng.wasm: HTTP " + res.status);
       const { instance } = await WebAssembly.instantiate(await res.arrayBuffer(), {});
       ox = instance.exports;
     } catch (err) {

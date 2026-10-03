@@ -9,7 +9,7 @@ members = [
     "crates/tool",
 ]
 # The SDL frontend needs the SDL2 development libraries. Build the portable
-# parts alone with: cargo build -p openxeen-engine -p openxeen-tool ...
+# parts alone with: cargo build -p openxeenng-engine -p openxeenng-tool ...
 default-members = [
     "crates/formats",
     "crates/engine",
@@ -22,11 +22,11 @@ version = "0.1.0"
 edition = "2024"
 rust-version = "1.85"
 license = "GPL-3.0-or-later"
-authors = ["OpenXeen contributors"]
+authors = ["OpenXeenNG contributors"]
 
 [workspace.dependencies]
-openxeen-formats = { path = "crates/formats" }
-openxeen-engine = { path = "crates/engine" }
+openxeenng-formats = { path = "crates/formats" }
+openxeenng-engine = { path = "crates/engine" }
 
 [workspace.lints.rust]
 unsafe_op_in_unsafe_fn = "deny"
@@ -44,7 +44,7 @@ codegen-units = 1
 # Debug builds stay fast enough to play: the software renderer is optimised.
 [profile.dev.package."*"]
 opt-level = 2
-[profile.dev.package.openxeen-engine]
+[profile.dev.package.openxeenng-engine]
 opt-level = 2
-[profile.dev.package.openxeen-formats]
+[profile.dev.package.openxeenng-formats]
 opt-level = 2

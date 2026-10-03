@@ -4,14 +4,14 @@
 //! The synthetic `xeen.cc` exercises every reader and viewer without any
 //! copyrighted material, so tests, CI and the browser demo can run end to end.
 
-use openxeen_formats::cc::CcBuilder;
-use openxeen_formats::evt::{MazeEvent, events_to_bytes};
-use openxeen_formats::font::FontBuilder;
-use openxeen_formats::maze::{Direction, MazeCell, MazeData, flags};
-use openxeen_formats::misc::string_table_to_bytes;
-use openxeen_formats::monster::{Monster, monster_table_to_bytes};
-use openxeen_formats::sprite::{IndexedImage, SpriteBuilder};
-use openxeen_formats::voc::build_voc_u8;
+use openxeenng_formats::cc::CcBuilder;
+use openxeenng_formats::evt::{MazeEvent, events_to_bytes};
+use openxeenng_formats::font::FontBuilder;
+use openxeenng_formats::maze::{Direction, MazeCell, MazeData, flags};
+use openxeenng_formats::misc::string_table_to_bytes;
+use openxeenng_formats::monster::{Monster, monster_table_to_bytes};
+use openxeenng_formats::sprite::{IndexedImage, SpriteBuilder};
+use openxeenng_formats::voc::build_voc_u8;
 
 use crate::font8x8::FONT8X8;
 use crate::present::default_palette;
@@ -144,7 +144,7 @@ pub fn synthetic_xeen_cc() -> Vec<u8> {
     );
     add(
         "global.icn",
-        sprite(vec![text_image("OPENXEEN", 3), text_image("SYNTH", 9)]),
+        sprite(vec![text_image("OPENXEENNG", 3), text_image("SYNTH", 9)]),
     );
     let mut back = vec![0u8; 320 * 200];
     for y in 0..200 {
@@ -235,8 +235,8 @@ pub fn synthetic_game_files() -> Vec<(String, Vec<u8>)> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use openxeen_formats::gamedata::{GameData, GameVariant, Side};
-    use openxeen_formats::{font, maze, sprite};
+    use openxeenng_formats::gamedata::{GameData, GameVariant, Side};
+    use openxeenng_formats::{font, maze, sprite};
 
     #[test]
     fn synthetic_data_parses_with_the_real_readers() {

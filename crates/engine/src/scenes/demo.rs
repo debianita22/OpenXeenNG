@@ -2,7 +2,7 @@
 //! Screen shown without game data: exercises the whole pipeline (sprite
 //! encoder -> decoder -> scaled/effect renderer -> palette -> audio -> input).
 
-use openxeen_formats::sprite::{SpriteBuilder, SpriteFile};
+use openxeenng_formats::sprite::{SpriteBuilder, SpriteFile};
 
 use crate::audio::{Channel, tone};
 use crate::exec::Cx;
@@ -33,7 +33,7 @@ pub async fn run(cx: Cx, message: Option<String>) {
     };
     let title = {
         let mut b = SpriteBuilder::new();
-        b.frame(text_image("OpenXeen", 2));
+        b.frame(text_image("OpenXeenNG", 2));
         SpriteFile::parse(b.build().expect("title sprite")).expect("title parses")
     };
     let base_palette = default_palette();
@@ -46,8 +46,8 @@ pub async fn run(cx: Cx, message: Option<String>) {
     cx.with(|io| {
         io.palette = base_palette;
         io.status = match &message {
-            Some(_) => "OpenXeen demo (game data rejected)".into(),
-            None => "OpenXeen demo (no game data)".into(),
+            Some(_) => "OpenXeenNG demo (game data rejected)".into(),
+            None => "OpenXeenNG demo (no game data)".into(),
         };
     });
 

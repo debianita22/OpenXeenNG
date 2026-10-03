@@ -31,7 +31,7 @@ browser, desktop/libretro/browser frontends, `xeentool`, ScummVM oracle.
 
 * Characters, roster, party creation, items and enchantments, conditions,
   spells (76), resting, experience and levels.
-* Save and load (original `.wox` format plus OpenXeen's own).
+* Save and load (original `.wox` format plus OpenXeenNG's own).
 
 ## M4 — Combat
 
@@ -46,7 +46,7 @@ browser, desktop/libretro/browser frontends, `xeentool`, ScummVM oracle.
 
 ## M6 — Improvements (all optional, off by default)
 
-The list OpenXeen was started for, plus what the new platforms need:
+The list OpenXeenNG was started for, plus what the new platforms need:
 
 | Switch | Effect |
 |---|---|

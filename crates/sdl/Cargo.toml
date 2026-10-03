@@ -1,6 +1,6 @@
 [package]
-name = "openxeen-sdl"
-description = "OpenXeen desktop frontend (SDL2): Linux, Windows, macOS"
+name = "openxeenng-sdl"
+description = "OpenXeenNG desktop frontend (SDL2): Linux, Windows, macOS"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -8,7 +8,7 @@ license.workspace = true
 authors.workspace = true
 
 [[bin]]
-name = "openxeen"
+name = "openxeenng"
 path = "src/main.rs"
 
 [features]
@@ -17,8 +17,8 @@ path = "src/main.rs"
 bundled = ["sdl2/bundled", "sdl2/static-link"]
 
 [dependencies]
-openxeen-engine.workspace = true
-openxeen-formats.workspace = true
+openxeenng-engine.workspace = true
+openxeenng-formats.workspace = true
 sdl2 = { version = "0.38", default-features = false }
 
 [lints]

@@ -3,7 +3,7 @@
 //!
 //! 60-byte records, layout ported from ScummVM `MonsterStruct::synchronize`
 //! (engines/mm/xeen/map.cpp, GPL-3.0-or-later). The table is read straight
-//! from the original data: no statistics are hard-coded in OpenXeen.
+//! from the original data: no statistics are hard-coded in OpenXeenNG.
 
 use crate::error::{FormatError, Result};
 use crate::io::{Reader, Writer};

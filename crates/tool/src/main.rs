@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! `xeentool`: command-line companion of OpenXeen.
+//! `xeentool`: command-line companion of OpenXeenNG.
 //!
 //! Inspects, extracts and rebuilds World of Xeen data files, converts
 //! graphics to PNG, disassembles map scripts and renders headless engine
@@ -10,20 +10,20 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
-use openxeen_engine::gfx::Surface;
-use openxeen_engine::present::{default_palette, level_lut};
-use openxeen_engine::scenes::browser::classify;
-use openxeen_engine::{Engine, EngineConfig, InputEvent, Key, synth};
-use openxeen_formats::cc::{CcArchive, CcBuilder};
-use openxeen_formats::names::{NameIndex, name_to_id};
-use openxeen_formats::palette::{DacScaling, VgaPalette};
-use openxeen_formats::sprite::SpriteFile;
-use openxeen_formats::{evt, misc};
+use openxeenng_engine::gfx::Surface;
+use openxeenng_engine::present::{default_palette, level_lut};
+use openxeenng_engine::scenes::browser::classify;
+use openxeenng_engine::{Engine, EngineConfig, InputEvent, Key, synth};
+use openxeenng_formats::cc::{CcArchive, CcBuilder};
+use openxeenng_formats::names::{NameIndex, name_to_id};
+use openxeenng_formats::palette::{DacScaling, VgaPalette};
+use openxeenng_formats::sprite::SpriteFile;
+use openxeenng_formats::{evt, misc};
 
 type Res<T> = Result<T, String>;
 
 const HELP: &str = "\
-xeentool - World of Xeen data tool (OpenXeen)
+xeentool - World of Xeen data tool (OpenXeenNG)
 
 USAGE:
   xeentool list <file.cc> [--unencoded]
@@ -328,7 +328,7 @@ fn cmd_palette(path: &Path, name: &str, out: &Path) -> Res<()> {
     for i in 0..256usize {
         let (x, y) = ((i % 16) as i32 * 16, (i / 16) as i32 * 16);
         s.fill_rect(
-            openxeen_engine::gfx::Rect::new(x, y, x + 16, y + 16),
+            openxeenng_engine::gfx::Rect::new(x, y, x + 16, y + 16),
             i as u8,
         );
     }
@@ -436,9 +436,14 @@ fn cmd_screenshot(
     for _ in 0..frames {
         engine.run_frame(16_667);
     }
-    let mut rgba = vec![0u8; openxeen_engine::WIDTH * openxeen_engine::HEIGHT * 4];
+    let mut rgba = vec![0u8; openxeenng_engine::WIDTH * openxeenng_engine::HEIGHT * 4];
     engine.frame_rgba(&mut rgba);
-    write_png(out, openxeen_engine::WIDTH, openxeen_engine::HEIGHT, &rgba)?;
+    write_png(
+        out,
+        openxeenng_engine::WIDTH,
+        openxeenng_engine::HEIGHT,
+        &rgba,
+    )?;
     eprintln!("{} -> {}", engine.status(), out.display());
     Ok(())
 }

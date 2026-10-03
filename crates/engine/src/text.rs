@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Text rendering: the built-in 8x8 UI font and the game's own font.
 
-use openxeen_formats::font::{Font, GLYPH_HEIGHT, GLYPH_WIDTH};
+use openxeenng_formats::font::{Font, GLYPH_HEIGHT, GLYPH_WIDTH};
 
 use crate::font8x8::FONT8X8;
 use crate::gfx::{Rect, Surface};
@@ -124,7 +124,7 @@ pub fn game_text_width(font: &Font, text: &[u8], reduced: bool) -> i32 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use openxeen_formats::font::FontBuilder;
+    use openxeenng_formats::font::FontBuilder;
 
     #[test]
     fn ui_text_draws_pixels() {

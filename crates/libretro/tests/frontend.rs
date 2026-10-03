@@ -5,7 +5,7 @@ use std::ffi::{CStr, CString, c_uint, c_void};
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 
-use openxeen_libretro::*;
+use openxeenng_libretro::*;
 
 static ENV_CMDS: Mutex<Vec<c_uint>> = Mutex::new(Vec::new());
 static FRAMES: AtomicUsize = AtomicUsize::new(0);
@@ -59,7 +59,7 @@ fn core_runs_demo_and_content_like_a_frontend() {
         unsafe { CStr::from_ptr(info.library_name) }
             .to_str()
             .unwrap(),
-        "OpenXeen"
+        "OpenXeenNG"
     );
     assert!(info.need_fullpath);
 
@@ -97,9 +97,9 @@ fn core_runs_demo_and_content_like_a_frontend() {
     retro_unload_game();
 
     // 2. Synthetic game data loaded through a content path.
-    let dir = std::env::temp_dir().join(format!("openxeen-libretro-{}", std::process::id()));
+    let dir = std::env::temp_dir().join(format!("openxeenng-libretro-{}", std::process::id()));
     std::fs::create_dir_all(&dir).unwrap();
-    for (name, bytes) in openxeen_engine::synth::synthetic_game_files() {
+    for (name, bytes) in openxeenng_engine::synth::synthetic_game_files() {
         std::fs::write(dir.join(name.to_uppercase()), bytes).unwrap();
     }
     let path = CString::new(dir.join("XEEN.CC").to_str().unwrap()).unwrap();

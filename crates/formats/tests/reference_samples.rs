@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Checks the parsers against real-format sample files.
 //!
-//! Set `OPENXEEN_REF_DIR` to ScummVM's `devtools/create_mm/files/xeen`
+//! Set `OPENXEENNG_REF_DIR` to ScummVM's `devtools/create_mm/files/xeen`
 //! directory (the CI workflow sparse-checks it out). Without it the test is
 //! skipped. The samples are not copied into this repository.
 
 use std::path::PathBuf;
 
-use openxeen_formats::{evt, maze, misc, mob, monster};
+use openxeenng_formats::{evt, maze, misc, mob, monster};
 
 fn ref_dir() -> Option<PathBuf> {
-    let dir = PathBuf::from(std::env::var_os("OPENXEEN_REF_DIR")?);
+    let dir = PathBuf::from(std::env::var_os("OPENXEENNG_REF_DIR")?);
     dir.is_dir().then_some(dir)
 }
 
@@ -21,7 +21,7 @@ fn read(dir: &std::path::Path, name: &str) -> Vec<u8> {
 #[test]
 fn scummvm_reference_samples_parse_and_round_trip() {
     let Some(dir) = ref_dir() else {
-        eprintln!("OPENXEEN_REF_DIR not set; skipping reference sample checks");
+        eprintln!("OPENXEENNG_REF_DIR not set; skipping reference sample checks");
         return;
     };
 

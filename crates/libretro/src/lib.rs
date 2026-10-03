@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! OpenXeen as a libretro core.
+//! OpenXeenNG as a libretro core.
 //!
 //! Load any file of the game directory (e.g. `XEEN.CC`) as content; every
 //! archive next to it is picked up. Started without content, the core runs
@@ -18,7 +18,7 @@ use std::ffi::{CStr, c_char, c_uint, c_void};
 use std::path::Path;
 use std::sync::Mutex;
 
-use openxeen_engine::{Engine, EngineConfig, GamepadButton, HEIGHT, InputEvent, Key, WIDTH};
+use openxeenng_engine::{Engine, EngineConfig, GamepadButton, HEIGHT, InputEvent, Key, WIDTH};
 
 // --- libretro.h subset -------------------------------------------------------
 
@@ -327,7 +327,7 @@ pub extern "C" fn retro_deinit() {
 /// Static core information.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn retro_get_system_info(info: *mut RetroSystemInfo) {
-    static NAME: &CStr = c"OpenXeen";
+    static NAME: &CStr = c"OpenXeenNG";
     static VERSION: &CStr = c"0.1.0";
     static EXTS: &CStr = c"cc";
     if info.is_null() {
@@ -359,7 +359,7 @@ pub unsafe extern "C" fn retro_get_system_av_info(info: *mut RetroSystemAvInfo) 
                 base_height: HEIGHT as c_uint,
                 max_width: WIDTH as c_uint,
                 max_height: HEIGHT as c_uint,
-                aspect_ratio: openxeen_engine::DISPLAY_ASPECT,
+                aspect_ratio: openxeenng_engine::DISPLAY_ASPECT,
             },
             timing: RetroSystemTiming {
                 fps: FPS,
@@ -509,7 +509,7 @@ pub unsafe extern "C" fn retro_run() {
         run_frame(core, cbs)
     }));
     if ok.is_err() {
-        eprintln!("[OpenXeen] internal error: the core stopped (please report this)");
+        eprintln!("[OpenXeenNG] internal error: the core stopped (please report this)");
         *guard = None;
         if let Some(env) = cbs.environment {
             // SAFETY: frontend callback, no data.

@@ -1,8 +1,8 @@
 # Software Information
-display_name = "Might and Magic: World of Xeen (OpenXeen)"
-authors = "OpenXeen contributors"
+display_name = "Might and Magic: World of Xeen (OpenXeenNG)"
+authors = "OpenXeenNG contributors"
 supported_extensions = "cc"
-corename = "OpenXeen"
+corename = "OpenXeenNG"
 license = "GPLv3"
 permissions = ""
 display_version = "0.1.0"
@@ -11,7 +11,7 @@ categories = "Game"
 # Hardware Information
 manufacturer = "PC"
 systemname = "Might and Magic: World of Xeen Game Engine"
-systemid = "openxeen"
+systemid = "openxeenng"
 
 # Libretro Features
 supports_no_game = "true"

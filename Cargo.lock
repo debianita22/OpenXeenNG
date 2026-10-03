@@ -107,46 +107,46 @@ dependencies = [
 ]
 
 [[package]]
-name = "openxeen-engine"
+name = "openxeenng-engine"
 version = "0.1.0"
 dependencies = [
- "openxeen-formats",
+ "openxeenng-formats",
 ]
 
 [[package]]
-name = "openxeen-formats"
+name = "openxeenng-formats"
 version = "0.1.0"
 
 [[package]]
-name = "openxeen-libretro"
+name = "openxeenng-libretro"
 version = "0.1.0"
 dependencies = [
- "openxeen-engine",
+ "openxeenng-engine",
 ]
 
 [[package]]
-name = "openxeen-sdl"
+name = "openxeenng-sdl"
 version = "0.1.0"
 dependencies = [
- "openxeen-engine",
- "openxeen-formats",
+ "openxeenng-engine",
+ "openxeenng-formats",
  "sdl2",
 ]
 
 [[package]]
-name = "openxeen-tool"
+name = "openxeenng-tool"
 version = "0.1.0"
 dependencies = [
- "openxeen-engine",
- "openxeen-formats",
+ "openxeenng-engine",
+ "openxeenng-formats",
  "png",
 ]
 
 [[package]]
-name = "openxeen-web"
+name = "openxeenng-web"
 version = "0.1.0"
 dependencies = [
- "openxeen-engine",
+ "openxeenng-engine",
 ]
 
 [[package]]

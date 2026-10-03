@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! OpenXeen desktop frontend (SDL2).
+//! OpenXeenNG desktop frontend (SDL2).
 //!
 //! ```text
-//! openxeen [--data DIR] [--scale N] [--fullscreen] [--no-aspect] [--dac full|shift]
+//! openxeenng [--data DIR] [--scale N] [--fullscreen] [--no-aspect] [--dac full|shift]
 //!          [--frames N --screenshot out.bmp] [--keys up,enter,...]
 //! ```
 //!
@@ -13,8 +13,8 @@
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
-use openxeen_engine::{Engine, EngineConfig, GamepadButton, HEIGHT, InputEvent, Key, WIDTH};
-use openxeen_formats::palette::DacScaling;
+use openxeenng_engine::{Engine, EngineConfig, GamepadButton, HEIGHT, InputEvent, Key, WIDTH};
+use openxeenng_formats::palette::DacScaling;
 use sdl2::audio::{AudioQueue, AudioSpecDesired};
 use sdl2::controller::{Button, GameController};
 use sdl2::event::{Event, WindowEvent};
@@ -38,7 +38,7 @@ struct Options {
 
 fn usage() -> ! {
     eprintln!(
-        "usage: openxeen [--data DIR] [--scale N] [--fullscreen] [--no-aspect] [--dac full|shift]\n\
+        "usage: openxeenng [--data DIR] [--scale N] [--fullscreen] [--no-aspect] [--dac full|shift]\n\
          \x20               [--frames N] [--screenshot out.bmp] [--keys k1,k2,...]"
     );
     std::process::exit(2);
@@ -213,7 +213,7 @@ fn picture_rect(win_w: u32, win_h: u32, aspect: bool) -> Rect {
 
 fn main() {
     if let Err(e) = run(parse_args()) {
-        eprintln!("openxeen: {e}");
+        eprintln!("openxeenng: {e}");
         std::process::exit(1);
     }
 }
@@ -244,7 +244,7 @@ fn run(opts: Options) -> Result<(), String> {
     } else {
         HEIGHT as u32 * opts.scale
     };
-    let mut wb = video.window("OpenXeen", win_w, win_h);
+    let mut wb = video.window("OpenXeenNG", win_w, win_h);
     wb.position_centered().resizable().allow_highdpi();
     if opts.fullscreen {
         wb.fullscreen_desktop();
@@ -260,7 +260,7 @@ fn run(opts: Options) -> Result<(), String> {
         Err(_) => {
             // Software fallback (e.g. offscreen/dummy drivers in CI).
             let window = video
-                .window("OpenXeen", win_w, win_h)
+                .window("OpenXeenNG", win_w, win_h)
                 .build()
                 .map_err(|e| e.to_string())?;
             window

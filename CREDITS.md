@@ -2,7 +2,7 @@
 
 * **ScummVM team** — the Xeen engine reimplementation (`engines/mm/xeen`,
   `engines/mm/shared/xeen`) and the tables extracted from the original
-  executables (`devtools/create_mm`). OpenXeen ports formats, algorithms and
+  executables (`devtools/create_mm`). OpenXeenNG ports formats, algorithms and
   tables from it. GPL-3.0-or-later. <https://www.scummvm.org/>
 * **Dr Warren Creemers (busyDuckman)** — the original OpenXeen (Java,
   2016–2017), whose goals and wishlist this project continues.
@@ -14,5 +14,5 @@
   <https://github.com/dhepper/font8x8>
 * **New World Computing** — Might and Magic IV and V.
 
-OpenXeen ships no game data and is not affiliated with the owners of the
+OpenXeenNG ships no game data and is not affiliated with the owners of the
 Might and Magic trademark, with GOG or with the ScummVM project.

@@ -1,5 +1,5 @@
 [package]
-name = "openxeen-formats"
+name = "openxeenng-formats"
 description = "Readers and writers for the Might and Magic IV/V (World of Xeen) data formats"
 version.workspace = true
 edition.workspace = true

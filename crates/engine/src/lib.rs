@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! OpenXeen engine core: platform-neutral, frame-stepped, no I/O.
+//! OpenXeenNG engine core: platform-neutral, frame-stepped, no I/O.
 //!
 //! Frontends (SDL2 desktop, libretro core, browser) own the window, input
 //! devices, audio device and file access. Each video frame they:
@@ -26,8 +26,8 @@ pub mod text;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use openxeen_formats::gamedata::GameData;
-use openxeen_formats::palette::DacScaling;
+use openxeenng_formats::gamedata::GameData;
+use openxeenng_formats::palette::DacScaling;
 
 use crate::exec::{Cx, Io, Task};
 pub use crate::input::{GamepadButton, InputEvent, Key};

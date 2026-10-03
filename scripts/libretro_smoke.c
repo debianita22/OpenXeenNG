@@ -3,7 +3,7 @@
  * Minimal libretro frontend used as a smoke test of a built core:
  *
  *   cc -O2 -o libretro_smoke scripts/libretro_smoke.c -ldl
- *   ./libretro_smoke path/to/openxeen_libretro.so [path/to/XEEN.CC]
+ *   ./libretro_smoke path/to/openxeenng_libretro.so [path/to/XEEN.CC]
  *
  * Loads the core with dlopen, runs the demo (no content) and, if given, the
  * content for 60 frames each, and checks that pictures and audio arrive.

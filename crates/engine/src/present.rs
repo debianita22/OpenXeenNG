@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Palette helpers and conversion of the indexed screen to true colour.
 
-use openxeen_formats::palette::DacScaling;
+use openxeenng_formats::palette::DacScaling;
 
 /// Engine palette: 256 entries of 8-bit levels in the engine's "VGA << 2"
 /// domain (0..=252 for full intensity).

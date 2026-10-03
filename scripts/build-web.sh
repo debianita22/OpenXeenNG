@@ -13,14 +13,14 @@ cd "$ROOT"
 TARGET=wasm32-unknown-unknown
 if rustc --print target-libdir --target "$TARGET" >/dev/null 2>&1 &&
     [ -d "$(rustc --print target-libdir --target "$TARGET")" ]; then
-    cargo build --release -p openxeen-web --target "$TARGET"
+    cargo build --release -p openxeenng-web --target "$TARGET"
 else
     echo "note: $TARGET std not installed; rebuilding std from rust-src" >&2
-    RUSTC_BOOTSTRAP=1 cargo build --release -p openxeen-web --target "$TARGET" \
+    RUSTC_BOOTSTRAP=1 cargo build --release -p openxeenng-web --target "$TARGET" \
         -Zbuild-std=std,panic_abort
 fi
 OUT="$ROOT/dist/web"
 mkdir -p "$OUT"
-cp "target/$TARGET/release/openxeen_web.wasm" "$OUT/openxeen.wasm"
+cp "target/$TARGET/release/openxeenng_web.wasm" "$OUT/openxeenng.wasm"
 cp crates/web/www/index.html crates/web/www/main.js "$OUT/"
 ls -l "$OUT"

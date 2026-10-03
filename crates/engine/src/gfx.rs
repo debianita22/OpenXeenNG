@@ -11,7 +11,7 @@
 //! * drawer 5 recomputes its threshold on every call (ScummVM caches the first
 //!   value in a function-level `static`, an accident of the port).
 
-use openxeen_formats::sprite::{
+use openxeenng_formats::sprite::{
     LINE_BUF, LINE_ORIGIN, MAX_FRAME_DIM, RowRecord, SpriteFile, TRANSPARENT, decode_line,
 };
 
@@ -273,7 +273,7 @@ fn scaled_val(n: i32, mask: &mut u16) -> i32 {
 }
 
 /// Error raised by the renderer on damaged sprite data.
-pub type DrawResult = openxeen_formats::Result<()>;
+pub type DrawResult = openxeenng_formats::Result<()>;
 
 /// Draws frame `frame` of `sprite` at `pos` (ScummVM `SpriteResource::draw`).
 ///
@@ -330,7 +330,7 @@ fn draw_cell(
     let drawer = flags & flags::MODE_MASK;
     let scale_index = usize::from(scale & SCALE_MASK);
     let Some(&base_mask) = SCALE_TABLE.get(scale_index) else {
-        return Err(openxeen_formats::FormatError::invalid(
+        return Err(openxeenng_formats::FormatError::invalid(
             "sprite scale",
             format!("scale {scale_index} out of range 0..16"),
         ));
@@ -354,7 +354,7 @@ fn draw_cell(
     if flags & flags::RESIZE != 0 {
         let (need_w, need_h) = ((x_offset + width) as usize, (y_offset + height) as usize);
         if need_w > MAX_FRAME_DIM || need_h > MAX_FRAME_DIM {
-            return Err(openxeen_formats::FormatError::invalid(
+            return Err(openxeenng_formats::FormatError::invalid(
                 "sprite resize",
                 format!("{need_w}x{need_h} exceeds {MAX_FRAME_DIM}x{MAX_FRAME_DIM}"),
             ));
@@ -628,7 +628,7 @@ fn draw_pixel3(
 mod tests {
     use super::*;
     use crate::rng::ScummRandom;
-    use openxeen_formats::sprite::{IndexedImage, SpriteBuilder};
+    use openxeenng_formats::sprite::{IndexedImage, SpriteBuilder};
 
     fn test_sprite() -> SpriteFile {
         let mut img = IndexedImage::new(16, 12);

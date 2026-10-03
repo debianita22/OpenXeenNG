@@ -4,20 +4,20 @@
 //! `oracle/build.sh` compiles `xeen_oracle`, a harness around functions
 //! extracted verbatim from ScummVM's Xeen engine. These tests feed the same
 //! randomly generated inputs to the oracle and to the Rust ports and require
-//! identical output. Set `OPENXEEN_ORACLE` to the harness binary; without it
+//! identical output. Set `OPENXEENNG_ORACLE` to the harness binary; without it
 //! the tests are skipped.
 
 use std::io::Write;
 use std::process::{Command, Stdio};
 
-use openxeen_engine::gfx::{self, DrawContext, Rect, SCALE_ENLARGE, Surface};
-use openxeen_engine::rng::{RandomSource, ScummRandom};
-use openxeen_formats::cc::{CcBuilder, parse_index};
-use openxeen_formats::names::{candidate_names, name_to_id};
-use openxeen_formats::sprite::SpriteFile;
+use openxeenng_engine::gfx::{self, DrawContext, Rect, SCALE_ENLARGE, Surface};
+use openxeenng_engine::rng::{RandomSource, ScummRandom};
+use openxeenng_formats::cc::{CcBuilder, parse_index};
+use openxeenng_formats::names::{candidate_names, name_to_id};
+use openxeenng_formats::sprite::SpriteFile;
 
 fn oracle() -> Option<String> {
-    std::env::var("OPENXEEN_ORACLE")
+    std::env::var("OPENXEENNG_ORACLE")
         .ok()
         .filter(|p| std::path::Path::new(p).exists())
 }
@@ -70,7 +70,7 @@ impl Gen {
 }
 
 fn tmp(name: &str) -> std::path::PathBuf {
-    let dir = std::env::temp_dir().join(format!("openxeen-oracle-{}", std::process::id()));
+    let dir = std::env::temp_dir().join(format!("openxeenng-oracle-{}", std::process::id()));
     std::fs::create_dir_all(&dir).unwrap();
     dir.join(name)
 }
@@ -141,7 +141,7 @@ fn cc_index_matches_scummvm() {
 }
 
 /// Builds a valid sprite resource using every opcode family, including the
-/// pattern and stream-copy commands the OpenXeen encoder never emits.
+/// pattern and stream-copy commands the OpenXeenNG encoder never emits.
 fn random_sprite(g: &mut Gen) -> Vec<u8> {
     let frames = g.range(1, 4) as usize;
     let mut data: Vec<u8> = Vec::new();

@@ -3,7 +3,7 @@
 # extracted verbatim from ScummVM's Xeen engine (GPL-3.0-or-later).
 #
 #   oracle/build.sh            -> target/oracle/xeen_oracle
-#   OPENXEEN_ORACLE=target/oracle/xeen_oracle cargo test -p openxeen-engine --test oracle
+#   OPENXEENNG_ORACLE=target/oracle/xeen_oracle cargo test -p openxeenng-engine --test oracle
 set -eu
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 REF="${SCUMMVM_DIR:-$ROOT/target/scummvm-ref}"
@@ -19,7 +19,7 @@ awk '/^#define SCREEN_WIDTH 320/{p=1} p&&/^int SpriteResource::_clippedBottom;/{
     "$SPR" > "$OUT/sprites_defs.inc"
 # getScaledVal .. SpriteResource::draw(dest, frame, pos, bounds, flags, scale)
 # The only edit: ScummVM caches drawer 5's threshold in a function-level
-# `static`, freezing the first value; OpenXeen implements the evident intent.
+# `static`, freezing the first value; OpenXeenNG implements the evident intent.
 awk '/^static inline uint getScaledVal/{p=1} p&&/^void SpriteResource::draw\(XSurface &dest, int frame\) const/{exit} p' \
     "$SPR" | sed 's/static const uint16 threshold = DRAWER5_THRESHOLD/const uint16 threshold = DRAWER5_THRESHOLD/' \
     > "$OUT/sprites_draw.inc"

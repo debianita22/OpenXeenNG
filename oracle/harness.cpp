@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Differential-test oracle for OpenXeen.
+// Differential-test oracle for OpenXeenNG.
 //
 // Compiles code extracted verbatim (see build.sh) from ScummVM's Xeen engine
 // and exposes it through a tiny command-line protocol, so the Rust ports can

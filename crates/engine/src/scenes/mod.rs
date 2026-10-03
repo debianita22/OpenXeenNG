@@ -6,7 +6,7 @@ pub mod demo;
 
 use std::rc::Rc;
 
-use openxeen_formats::gamedata::GameData;
+use openxeenng_formats::gamedata::GameData;
 
 use crate::exec::Cx;
 

@@ -5,19 +5,19 @@
 
 use std::rc::Rc;
 
-use openxeen_formats::cc::CcEntry;
-use openxeen_formats::evt;
-use openxeen_formats::font::Font;
-use openxeen_formats::gamedata::{GameData, Side};
-use openxeen_formats::maze::{Direction, MAP_SIZE, MazeData};
-use openxeen_formats::misc::{self, HeadData};
-use openxeen_formats::mob::MobFile;
-use openxeen_formats::monster::{self, parse_monster_table};
-use openxeen_formats::names::NameIndex;
-use openxeen_formats::palette::VgaPalette;
-use openxeen_formats::sprite::SpriteFile;
-use openxeen_formats::tables::TEXT_COLORS;
-use openxeen_formats::voc::parse_voc;
+use openxeenng_formats::cc::CcEntry;
+use openxeenng_formats::evt;
+use openxeenng_formats::font::Font;
+use openxeenng_formats::gamedata::{GameData, Side};
+use openxeenng_formats::maze::{Direction, MAP_SIZE, MazeData};
+use openxeenng_formats::misc::{self, HeadData};
+use openxeenng_formats::mob::MobFile;
+use openxeenng_formats::monster::{self, parse_monster_table};
+use openxeenng_formats::names::NameIndex;
+use openxeenng_formats::palette::VgaPalette;
+use openxeenng_formats::sprite::SpriteFile;
+use openxeenng_formats::tables::TEXT_COLORS;
+use openxeenng_formats::voc::parse_voc;
 
 use crate::audio::Channel;
 use crate::exec::{Cx, Io};
@@ -655,7 +655,7 @@ impl Browser {
         };
         io.palette = pal;
         let ui = UiColors::from_palette(&pal);
-        io.status = format!("OpenXeen asset browser - {variant}");
+        io.status = format!("OpenXeenNG asset browser - {variant}");
         let ticks = io.ticks;
         let s = &mut io.screen;
         s.clear(ui.bg);
@@ -1068,7 +1068,7 @@ mod tests {
 
     #[test]
     fn damaged_entries_do_not_crash_the_browser() {
-        use openxeen_formats::cc::CcBuilder;
+        use openxeenng_formats::cc::CcBuilder;
         // A sprite-looking entry with a 700-pixel cell (wider than the line
         // buffer) under a name the dictionary does not know.
         let mut wide = vec![1u8, 0, 6, 0, 0, 0];

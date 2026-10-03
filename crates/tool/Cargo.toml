@@ -1,5 +1,5 @@
 [package]
-name = "openxeen-tool"
+name = "openxeenng-tool"
 description = "xeentool: inspect, extract and build World of Xeen data files"
 version.workspace = true
 edition.workspace = true
@@ -12,8 +12,8 @@ name = "xeentool"
 path = "src/main.rs"
 
 [dependencies]
-openxeen-formats.workspace = true
-openxeen-engine.workspace = true
+openxeenng-formats.workspace = true
+openxeenng-engine.workspace = true
 png = "0.17"
 
 [lints]

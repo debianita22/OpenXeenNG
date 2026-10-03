@@ -1,6 +1,6 @@
 [package]
-name = "openxeen-web"
-description = "OpenXeen in the browser (WebAssembly, no JS framework)"
+name = "openxeenng-web"
+description = "OpenXeenNG in the browser (WebAssembly, no JS framework)"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -8,11 +8,11 @@ license.workspace = true
 authors.workspace = true
 
 [lib]
-name = "openxeen_web"
+name = "openxeenng_web"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-openxeen-engine.workspace = true
+openxeenng-engine.workspace = true
 
 [lints]
 workspace = true

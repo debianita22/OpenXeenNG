@@ -6,7 +6,7 @@
    original. ScummVM's reimplementation of the Xeen engine
    (`engines/mm/xeen`, about 46 000 lines of C++) is the reference for game
    logic; differential tests hold the port to it.
-2. **Improvable**: the enhancements OpenXeen was started for are opt-in
+2. **Improvable**: the enhancements OpenXeenNG was started for are opt-in
    switches on top of the faithful core, never forks of it.
 3. **Portable**: one core for desktop, libretro (RetroArch, Lakka, handhelds)
    and the browser, with no platform code in the core.
@@ -14,12 +14,12 @@
 ## Crates
 
 ```
-crates/formats   openxeen-formats   original data formats (read + write)
-crates/engine    openxeen-engine    frame-stepped core, renderer, mixer, flows
-crates/sdl       openxeen-sdl       desktop frontend      -> `openxeen`
-crates/libretro  openxeen-libretro  libretro core         -> libopenxeen_libretro
-crates/web       openxeen-web       WebAssembly module + www/ page
-crates/tool      openxeen-tool      command line          -> `xeentool`
+crates/formats   openxeenng-formats   original data formats (read + write)
+crates/engine    openxeenng-engine    frame-stepped core, renderer, mixer, flows
+crates/sdl       openxeenng-sdl       desktop frontend      -> `openxeenng`
+crates/libretro  openxeenng-libretro  libretro core         -> libopenxeenng_libretro
+crates/web       openxeenng-web       WebAssembly module + www/ page
+crates/tool      openxeenng-tool      command line          -> `xeentool`
 oracle/                             ScummVM-based differential test harness
 ```
 
@@ -48,7 +48,7 @@ The original engine is written in a blocking style: a dialog draws itself
 and loops until a key arrives; a fade loops for N ticks. libretro and the
 browser call the engine once per video frame and forbid blocking.
 
-OpenXeen writes game flows as `async fn` and polls the top-level future once
+OpenXeenNG writes game flows as `async fn` and polls the top-level future once
 per `Engine::run_frame`:
 
 ```rust
@@ -117,8 +117,8 @@ and the oracle can replay the same numbers.
 | Layer | How |
 |---|---|
 | Parsers | unit tests on hand-built and synthetic data; malformed data must error, not panic |
-| Real formats | `formats/tests/reference_samples.rs` on ScummVM's real-format sample files (`OPENXEEN_REF_DIR`) |
-| Ported algorithms | `engine/tests/oracle.rs`: same random inputs to the Rust port and to ScummVM's own code (`OPENXEEN_ORACLE`) |
+| Real formats | `formats/tests/reference_samples.rs` on ScummVM's real-format sample files (`OPENXEENNG_REF_DIR`) |
+| Ported algorithms | `engine/tests/oracle.rs`: same random inputs to the Rust port and to ScummVM's own code (`OPENXEENNG_ORACLE`) |
 | Engine flows | headless runs through `Engine` with scripted input |
 | Frontends | simulated libretro frontend, RetroArch `--max-frames` screenshots, SDL under Xvfb, Playwright for the browser |
 

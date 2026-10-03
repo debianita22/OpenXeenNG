@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! OpenXeen for the browser.
+//! OpenXeenNG for the browser.
 //!
 //! A plain WebAssembly module with a tiny C-style API used by `www/main.js`
 //! (no wasm-bindgen): the page copies the files the player picks into wasm
@@ -9,7 +9,7 @@
 
 use std::cell::RefCell;
 
-use openxeen_engine::{Engine, EngineConfig, HEIGHT, InputEvent, Key, WIDTH};
+use openxeenng_engine::{Engine, EngineConfig, HEIGHT, InputEvent, Key, WIDTH};
 
 struct State {
     files: Vec<(String, Vec<u8>)>,
@@ -84,7 +84,7 @@ pub extern "C" fn ox_start(audio_rate: u32) {
 #[unsafe(no_mangle)]
 pub extern "C" fn ox_start_synthetic(audio_rate: u32) {
     STATE.with_borrow_mut(|s| {
-        s.files = openxeen_engine::synth::synthetic_game_files();
+        s.files = openxeenng_engine::synth::synthetic_game_files();
     });
     ox_start(audio_rate);
 }
@@ -224,7 +224,7 @@ mod tests {
     #[test]
     fn api_round_trip() {
         let name = b"xeen.cc";
-        let data = openxeen_engine::synth::synthetic_xeen_cc();
+        let data = openxeenng_engine::synth::synthetic_xeen_cc();
         let np = ox_alloc(name.len());
         let dp = ox_alloc(data.len());
         unsafe {
