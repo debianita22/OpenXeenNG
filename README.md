@@ -57,7 +57,8 @@ Without `--data` the current directory is used when it holds the archives;
 otherwise a demo of the renderer runs. You can also drop the game folder onto
 the window. Keys: arrows, Enter, Esc, Tab (switch archive), F11 fullscreen.
 Needs the SDL2 development package on Linux (`libsdl2-dev`); on Windows and
-macOS `--features bundled` builds SDL2 from source.
+macOS `--features bundled` builds SDL2 from source (needs CMake; with CMake 4
+set `CMAKE_POLICY_VERSION_MINIMUM=3.5`, as the bundled SDL2 declares 3.0).
 
 ### RetroArch (libretro core)
 
